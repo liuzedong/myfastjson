@@ -1,7 +1,7 @@
 package com.dongdongxia.myfastjson.serializer;
 /**
  * 
- * <P>Description: 序列化使用枚举</P>
+ * <P>Description: 生成JSON字符串的功能枚举</P>
  * @ClassName: SerialerFeature
  * @author java_liudong@163.com  2017年4月25日 上午11:43:25
  */
