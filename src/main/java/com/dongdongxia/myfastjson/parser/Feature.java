@@ -26,7 +26,7 @@ public enum Feature {
 	/**
 	 * 
 	 */
-	InternFieldName,
+	InternFieldNames,
 	/**
 	 * 
 	 */
