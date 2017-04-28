@@ -75,6 +75,38 @@ public final class SerializeWriter extends Writer{
 		computeFeatures();
 	}
 	
+	/**
+	 * 
+	 * <p>Title: Constructor</p>
+	 * <p>Description: 初始化输出字长</p>
+	 * @param initalSize 指定缓冲大小
+	 */
+	public SerializeWriter(int initalSize) {
+		this(null, initalSize);
+	}
+	
+	/**
+	 * 
+	 * <p>Title: Constructor</p>
+	 * <p>Description: 初始化writer 和 buf  </p>
+	 * @param writer
+	 * @param initialSize
+	 */
+	public SerializeWriter(Writer writer, int initialSize) {
+		this.writer = writer;
+		// 说明入参 错误
+		if (initialSize <= 0) {
+			throw new IllegalArgumentException("Negative initial size: " + initialSize);
+		}
+		buf = new char[initialSize];
+		
+		// 此处不做, 序列化功能的 赋值
+//		computeFeatures();
+	}
+	
+	
+	
+	
 	// 非直接的特性
 	final static int nonDirectFeatures = 0
 			| SerializerFeature.UseSingleQuotes.mask
