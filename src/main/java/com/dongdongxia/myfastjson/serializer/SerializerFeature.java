@@ -7,93 +7,93 @@ package com.dongdongxia.myfastjson.serializer;
  */
 public enum SerializerFeature {
 
-	QuoteFieldNames,
+	QuoteFieldNames, // 输出Key时是否使用双引号, 默认true
 	/**
 	 * 
 	 */
-	UseSingleQuotes,
+	UseSingleQuotes, // 使用单引号而不是双引号, 默认为false
 	/**
 	 * 
 	 */
-	WriteMapNullValue,
+	WriteMapNullValue, // 是否输出值为null的字段, 默认为false
 	/**
 	 * 用枚举toString()值输出
 	 */
-	WriteEnumUsingToString,
+	WriteEnumUsingToString, // Enum输出name() 或者 original, 默认为false
 	/**
 	 * 用枚举name()输出
 	 */
-	WriteEnumUsingName,
+	WriteEnumUsingName, // 
 	/**
 	 * 
 	 */
-	UseISO8501DateFormat,
+	UseISO8501DateFormat, // Date使用ISO8601格式输出，默认为false
 	/**
 	 * 
 	 */
-	WriteNullListAsEmpty,
+	WriteNullListAsEmpty, // List字段如果为null,输出为[],而非null 
 	/**
 	 * 
 	 */
-	WriteNullStringAsEmpty,
+	WriteNullStringAsEmpty, // 字符类型字段如果为null,输出为"",而非null 
 	/**
 	 * 
 	 */
-	WriteNullNumberAsZero,
+	WriteNullNumberAsZero, // 数值字段如果为null,输出为0,而非null 
 	/**
 	 * 
 	 */
-	WriteNullBooleanAsFalse,
+	WriteNullBooleanAsFalse, // Boolean字段如果为null,输出为false,而非null
 	/**
 	 * 
 	 */
-	SkipTransientField,
+	SkipTransientField, // 如果是true，类中的Get方法对应的Field是transient，序列化时将会被忽略。默认为true
 	/**
 	 * 
 	 */
-	SortField,
+	SortField, // 按字段名称排序后输出。默认为false
 	/**
 	 * 
 	 */
 	@Deprecated
-	WriteTabAsSpecial,
+	WriteTabAsSpecial, // 把\t做转义输出，默认为false
 	/**
 	 * 
 	 */
-	PrettyFormat,
+	PrettyFormat, // 结果是否格式化,默认为false
 	/**
 	 * 
 	 */
-	WriteClassName,
+	WriteClassName, // 序列化时写入类型信息，默认为false。反序列化是需用到
 	/**
 	 * 
 	 */
-	DisableCircularReferenceDetect, // 32768
+	DisableCircularReferenceDetect, // 32768, 消除对同一对象循环引用的问题，默认为false
 	/**
 	 * @since 1.1.9
 	 */
-	WriteSlashAsSpecial,
+	WriteSlashAsSpecial, // 对斜杠'/'进行转义
 	/**
 	 * 
 	 */
-	BrowerCompatible,
+	BrowerCompatible, // 将中文都会序列化为\\uXXXX格式，字节数会多一些，但是能兼容IE 6，默认为false
 	/**
 	 * 
 	 */
-	WriteDateUseDateFormat,
+	WriteDateUseDateFormat, // 全局修改日期格式,默认为false。JSON.DEFFAULT_DATE_FORMAT = "yyyy-MM-dd";JSON.toJSONString(obj, SerializerFeature.WriteDateUseDateFormat);
 	/**
 	 * 
 	 */
-	NotWriteRootClassName,
+	NotWriteRootClassName, // 
 	/**
 	 * 
 	 */
 	@Deprecated
-	DisableCheckSpecialChar,
+	DisableCheckSpecialChar, // 一个对象的字符串属性中如果有特殊字符如双引号，将会在转成json时带有反斜杠转移符。如果不需要转义，可以使用这个属性。默认为false 
 	/**
 	 * 
 	 */
-	BeanToArray,
+	BeanToArray, 
 	/**
 	 * 
 	 */
