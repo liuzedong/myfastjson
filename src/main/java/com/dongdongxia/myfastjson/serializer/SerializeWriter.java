@@ -12,19 +12,19 @@ import java.nio.charset.Charset;
 public final class SerializeWriter extends Writer{
 
 	private final static Charset UTF8 = Charset.forName("UTF-8");
-	
+	/** 在构造方法中初始化 **/
 	private final static ThreadLocal<char[]> bufLocal = new ThreadLocal<char[]>();
 	private final static ThreadLocal<byte[]> bytesBufLocal = new ThreadLocal<byte[]>();
-	
+	/** 在构造方法中初始化 **/
 	protected char buf[];
 	
 	protected int count;
-	
+	/** 在构造方法中初始化 **/
 	protected int features;
 	
 	private final Writer writer;
 	
-	/**以下定义字段, 检测序列化的时候, 是否包含这些功能*/
+	/**以下定义字段, 检测序列化的时候, 是否包含这些功能, 在构造方法中初始化*/
 	protected boolean useSingleQuotes; // 使用单引号而不是双引号, 默认为false
 	protected boolean quoteFieldNames; // 输出Key时是否使用双引号, 默认true
 	protected boolean sortField; // 按字段名称排序后输出。默认为false
@@ -38,22 +38,55 @@ public final class SerializeWriter extends Writer{
 	
 	protected char keySeperator;
 	
+	/**
+	 * 
+	 * <p>Title: Constructor</p>
+	 * <p>Description: 默认构造方法</p>
+	 */
 	public SerializeWriter(){
 		this((Writer) null);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: Constructor</p>
+	 * <p>Description: 构造方法, 添加默认的 流的特性, 1:SerializerFeature.QuoteFieldNames</p>
+	 * <p>SerializerFeature.EMPTY, 这个是默认特性,就是啥都没有</p>
+	 * @param writer 输出流
+	 */
 	public SerializeWriter(Writer writer){
 		this(writer, 1, SerializerFeature.EMPTY);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: Constructor</p>
+	 * <p>Description: 构造方法, 初始化指定流的特性</p>
+	 * @param features 输出流的特性, 多个使用 | 进行拼接, 组成
+	 */
 	public SerializeWriter(SerializerFeature... features){
 		this(null, features);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: Constructor</p>
+	 * <p>Description: 构造方法,添加 指定的流, 添加 指定的特性</p>
+	 * @param writer 指定输出流
+	 * @param features 指定输出流的特性
+	 */
 	public SerializeWriter(Writer writer, SerializerFeature... features){
 		this(writer, 0, features);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: Constructor</p>
+	 * <p>Description: 给全局变量,进行赋值, 在下面各个方法中,使用到</p>
+	 * @param writer 指定的输出流, Writer的子类,都行如 FileWriter等
+	 * @param defaultFeatures 添加默认的属性, Features 的属性
+	 * @param features 添加默认的属性,以数组形式表示 SerializerFeature 的属性
+	 */
 	public SerializeWriter(Writer writer, int defaultFeatures, SerializerFeature... features){
 		this.writer = writer;
 		
