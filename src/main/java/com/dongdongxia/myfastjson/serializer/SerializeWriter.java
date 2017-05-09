@@ -259,6 +259,41 @@ public final class SerializeWriter extends Writer{
 		return this.notWriteDefaultValue;
 	}
 	
+	/**
+	 * 
+	 * <p>Title: isEnable</p>
+	 * <p>Description: 检测, 初始化的是否, 是否包含 该特性</p>
+	 * @param feature 序列化特性
+	 * @return 
+	 * @author java_liudong@163.com  2017年5月9日 上午10:58:17
+	 */
+	public boolean isEnable(SerializerFeature feature) {
+		/**
+		 * 为0 则不包含
+		 * 不为 0 则包含
+		 * 情况一 :
+		 * 1 1 1 1
+		 * 0 1 0 0 &
+		 * 0 1 0 0 不为0 , 所以包含
+		 * 情况二 : 
+		 * 0 1 1 1
+		 * 1 0 0 0 &
+		 * 0 0 0 0 为0 , 所以不包含
+		 */
+		return (this.features & feature.mask) != 0;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: isEnable</p>
+	 * <p>Description: 检测是否, 包含多个字段</p>
+	 * @param feature 多个特性
+	 * @return
+	 * @author java_liudong@163.com  2017年5月9日 上午11:06:00
+	 */
+	public boolean isEnable(int feature) {
+		return (this.features & feature) != 0;
+	}
 	
 	@Override
 	public void flush() throws IOException {
