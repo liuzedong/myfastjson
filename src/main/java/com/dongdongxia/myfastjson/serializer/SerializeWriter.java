@@ -34,7 +34,7 @@ public final class SerializeWriter extends Writer{
 	protected boolean disableCircularReferenceDetect; // 32768, 消除对同一对象循环引用的问题，默认为false
 	protected boolean beanToArray; // bean转换为Array数组
 	protected boolean writeNonStringValueAsString;
-	protected boolean notWriteDefaultValue;
+	protected boolean notWriteDefaultValue; // 不写入默认值
 	protected boolean writeEnumUsingName;
 	protected boolean writeEnumUsingToString; // Enum输出name() 或者 original, 默认为false
 	protected boolean writeDirect; // 几个属性的综合, 见下面的初始化方法
@@ -236,6 +236,29 @@ public final class SerializeWriter extends Writer{
 	public int getBufferLength() {
 		return this.buf.length;
 	}
+	
+	/**
+	 * 
+	 * <p>Title: isSortField</p>
+	 * <p>Description: 检测是否 按字段名称排序后输出, 就是获取全局变量的值, 在构造方法中初始化的</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年5月9日 上午10:54:36
+	 */
+	public boolean isSortField() {
+		return this.sortField;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: isNotWriteDefaultValue</p>
+	 * <p>Description: 检测是否 不写出默认值, 就是获取全局变量的值, 在构造方法中初始化的</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年5月9日 上午10:54:52
+	 */
+	public boolean isNotWriteDefaultValue() {
+		return this.notWriteDefaultValue;
+	}
+	
 	
 	@Override
 	public void flush() throws IOException {
