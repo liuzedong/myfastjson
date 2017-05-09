@@ -280,6 +280,24 @@ public final class SerializeWriter extends Writer{
 	public boolean isEnable(int feature) {
 		return (this.features & feature) != 0;
 	}
+
+	/**
+	 * 将一个字符写入缓冲区中,其实,就是写入到 buf中
+	 */
+	@Override
+	public void write(int c) throws IOException {
+		int newcount = count + 1;
+		if (newcount > buf.length) {
+			if (writer == null) {
+				expandCapacity(newcount);
+			} else {
+				flush();
+				newcount = 1;
+			}
+		}
+		buf[count] = (char)c; // 在数组中添加一个字符
+		count = newcount; // 将计算出来的, 数组长度, 复制给count
+	}
 	
 	@Override
 	public void write(char[] c, int off, int len) {
@@ -298,7 +316,6 @@ public final class SerializeWriter extends Writer{
 	
 	@Override
 	public void flush() throws IOException {
-		// TODO Auto-generated method stub
 		
 	}
 
