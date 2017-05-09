@@ -21,6 +21,7 @@ public final class SerializeWriter extends Writer{
 	/** 在构造方法中初始化, 初始化缓冲区 **/
 	protected char buf[];
 	
+	/** 记录的是buf中的总长度, 在每个write方法中都有增加**/
 	protected int count;
 	/** 在构造方法中初始化 **/
 	protected int features;
