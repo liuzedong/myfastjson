@@ -14,6 +14,7 @@ public final class SerializeWriter extends Writer{
 	private final static Charset UTF8 = Charset.forName("UTF-8");
 	/** 在构造方法中初始化 **/
 	private final static ThreadLocal<char[]> bufLocal = new ThreadLocal<char[]>();
+	
 	private final static ThreadLocal<byte[]> bytesBufLocal = new ThreadLocal<byte[]>();
 	/** 在构造方法中初始化 **/
 	protected char buf[];
@@ -36,7 +37,9 @@ public final class SerializeWriter extends Writer{
 	protected boolean writeEnumUsingToString; // Enum输出name() 或者 original, 默认为false
 	protected boolean writeDirect; // 几个属性的综合, 见下面的初始化方法
 	
-	protected char keySeperator;
+	protected char keySeperator; // 检测key 是使用 ' 还是" 来进行包起来
+	
+	protected int maxBufSize = -1; // 最大的缓存空间, 默认 为 -1, 就是没有啦, 构造方法没有初始化, 在指定方法中赋值
 	
 	/**
 	 * 
