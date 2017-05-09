@@ -185,21 +185,6 @@ public final class SerializeWriter extends Writer{
 		// 检测 使用是单引号  还是 双引号
 		keySeperator = useSingleQuotes ? '\'' : '"';
 	}
-	
-	@Override
-	public void write(char[] c, int off, int len) {
-		// 不符合写出规则的就抛出异常, 这些都是检测 字符是否越界
-		if (off < 0 || off > c.length || len < 0 || off + len > c.length || off + len < 0){
-			throw new IndexOutOfBoundsException();
-		} else if (len == 0){
-			return ;
-		}
-		
-		int newcount = count + len;
-		if (newcount > buf.length){
-			
-		}
-	}
 
 	/**
 	 * 
@@ -296,6 +281,21 @@ public final class SerializeWriter extends Writer{
 	}
 	
 	@Override
+	public void write(char[] c, int off, int len) {
+		// 不符合写出规则的就抛出异常, 这些都是检测 字符是否越界
+		if (off < 0 || off > c.length || len < 0 || off + len > c.length || off + len < 0){
+			throw new IndexOutOfBoundsException();
+		} else if (len == 0){
+			return ;
+		}
+		
+		int newcount = count + len;
+		if (newcount > buf.length){
+			
+		}
+	}
+	
+	@Override
 	public void flush() throws IOException {
 		// TODO Auto-generated method stub
 		
@@ -307,4 +307,28 @@ public final class SerializeWriter extends Writer{
 		
 	}
 
+	/**
+	 * 
+	 * <p>Title: expandCapacity</p>
+	 * <p>Description: 为buf 缓冲区进行扩充容量</p>
+	 * @param minimumCapacity 扩充的最小容量
+	 * @author java_liudong@163.com  2017年5月9日 上午11:30:38
+	 */
+	public void expandCapacity(int minimumCapacity) {
+		// 扩展的容量, 必须不能大于 最大容量, maxBufSize 为指定 的一个最大值, 不指定则 为-1, 就可以无限扩大
+		if (maxBufSize != -1 && minimumCapacity >= maxBufSize) {
+			throw new JSONException("serialize exceeded MAX_OUTPUT_LENGTH = " + maxBufSize + ", minimumCapacity = " + minimumCapacity);
+		}
+		// 如果 buf 最开始 为 4 , 则 4 * 3 / 2 + 1 = 7; (x * 3) / 2 + 1; 是一个增函数, 增加速度比较一般, 所以扩容时候,比较好, 不会有太大的波动
+		int newCapacity = (buf.length * 3) / 2 + 1;
+		
+		// 如果, 算出来还没有  , 最小的大, 那么就直接使用最小的值
+		if (newCapacity < minimumCapacity) {
+			newCapacity = minimumCapacity;
+		}
+		// 初始化, 扩容的 数组, 然后, 将数组, copy 过来, 使用新的 数组容器
+		char newValue[] = new char[newCapacity];
+		System.arraycopy(buf, 0, newValue, 0, count);
+		buf = newValue;
+	}
 }
