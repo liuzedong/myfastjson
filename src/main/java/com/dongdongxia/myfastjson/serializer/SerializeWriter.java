@@ -285,7 +285,7 @@ public final class SerializeWriter extends Writer{
 	 * 将一个字符写入缓冲区中,其实,就是写入到 buf中
 	 */
 	@Override
-	public void write(int c) throws IOException {
+	public void write(int c) {
 		int newcount = count + 1;
 		// 下面的判断是, 如果,新加 的长度, 如果查过原有的容器大小, 且 没有writer那么就扩容, 不然,就写出,然后再扩容
 		if (newcount > buf.length) {
@@ -300,6 +300,12 @@ public final class SerializeWriter extends Writer{
 		count = newcount; // 将计算出来的, 数组长度, 复制给count
 	}
 	
+	/**
+	 * 写入c[]数组, 从指定的位置,到指定的长度
+	 * c 写入内容
+	 * off 起始位置
+	 * len 总长度
+	 */
 	@Override
 	public void write(char[] c, int off, int len) {
 		// 不符合写出规则的就抛出异常, 这些都是检测 字符是否越界
@@ -311,14 +317,40 @@ public final class SerializeWriter extends Writer{
 		
 		int newcount = count + len;
 		if (newcount > buf.length){
-			if (writer == null) {
-				
+			if (writer == null) { // 没有writer对象, 且保存的内容, 大于 数组的容量, 扩容吧
+				expandCapacity(newcount);
+			} else {
+				// 有Writer的话, 那么就先写出去吧
+				do {
+					// buf.length 总容量, count 使用容量, rest 未使用容量
+					int rest = buf.length - count;
+					// 将方法中的请求的c[] 指定的off 位置开始, 复制到, buf的 count 开始, 然后到剩余的容量里面
+					/** 比如: buf.leng=10, c.leng=5,count=5, c的off是2, 
+					 * buf[0]=刘,buf[1]=话,buf[2]=西,buf[3]=钱,buf[4]=o,buf[5]=null,buf[6]=null,buf[7]=null,buf[8]=null,buf[9]=null
+					 * c[0]=阿,c[1]=阿,c[2]=阿,c[3]=阿,c[4]=阿
+					 * 则rest = 10 - 5 = 5
+					 * buf[0]=刘,buf[1]=话,buf[2]=西,buf[3]=钱,buf[4]=o,buf[5]=阿,buf[6]=阿,buf[7]=阿,buf[8]=null,buf[9]=null
+					 */
+					System.arraycopy(c, off, buf, count, rest);
+					// 将复制后的 缓冲区, buf的长度, 赋值给count
+					count = buf.length;
+					// buf 缓冲区的内容写出去
+					flush();
+					// len 要复制的总容量, 算出来还剩多少没有复制过去
+					len -= rest;
+					// off 是复制的起始位置, 将位置添加上已经复制的长度,等于现在的大小
+					off += rest;
+				} while (len > buf.length); // 
+				newcount = len;
 			}
 		}
+		// 将剩余的 都拷贝到 buf中
+		System.arraycopy(c, off, buf, count, len);
+		count = newcount;
 	}
 	
 	@Override
-	public void flush() throws IOException {
+	public void flush() {
 		if (writer == null) {
 			return ;
 		}
