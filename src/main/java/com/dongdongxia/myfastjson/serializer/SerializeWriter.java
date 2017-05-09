@@ -25,16 +25,16 @@ public final class SerializeWriter extends Writer{
 	private final Writer writer;
 	
 	/**以下定义字段, 检测序列化的时候, 是否包含这些功能*/
-	protected boolean useSingleQuotes;
-	protected boolean quoteFieldNames;
-	protected boolean sortField;
-	protected boolean disableCircularReferenceDetect;
-	protected boolean beanToArray;
+	protected boolean useSingleQuotes; // 使用单引号而不是双引号, 默认为false
+	protected boolean quoteFieldNames; // 输出Key时是否使用双引号, 默认true
+	protected boolean sortField; // 按字段名称排序后输出。默认为false
+	protected boolean disableCircularReferenceDetect; // 32768, 消除对同一对象循环引用的问题，默认为false
+	protected boolean beanToArray; // bean转换为Array数组
 	protected boolean writeNonStringValueAsString;
 	protected boolean notWriteDefaultValue;
 	protected boolean writeEnumUsingName;
-	protected boolean writeEnumUsingToString;
-	protected boolean writeDirect;
+	protected boolean writeEnumUsingToString; // Enum输出name() 或者 original, 默认为false
+	protected boolean writeDirect; // 几个属性的综合, 见下面的初始化方法
 	
 	protected char keySeperator;
 	
