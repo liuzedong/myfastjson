@@ -18,7 +18,7 @@ public final class SerializeWriter extends Writer{
 	private final static ThreadLocal<char[]> bufLocal = new ThreadLocal<char[]>();
 	
 	private final static ThreadLocal<byte[]> bytesBufLocal = new ThreadLocal<byte[]>();
-	/** 在构造方法中初始化 **/
+	/** 在构造方法中初始化, 初始化缓冲区 **/
 	protected char buf[];
 	
 	protected int count;
@@ -224,6 +224,17 @@ public final class SerializeWriter extends Writer{
 			throw new JSONException("must > " + buf.length);
 		}
 		this.maxBufSize = maxBufSize;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: getBufferLength</p>
+	 * <p>Description: 获取缓冲区的长度, 没有设置缓冲去的长度, 因为,在构造方法中已经初始化啦</p>
+	 * @return 缓冲区长度
+	 * @author java_liudong@163.com  2017年5月9日 上午10:50:04
+	 */
+	public int getBufferLength() {
+		return this.buf.length;
 	}
 	
 	@Override
