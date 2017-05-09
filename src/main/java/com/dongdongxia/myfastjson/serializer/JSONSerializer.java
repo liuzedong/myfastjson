@@ -7,4 +7,9 @@ package com.dongdongxia.myfastjson.serializer;
  */
 public class JSONSerializer extends SerializerFilterable{
 
+	
+	protected final void writeKeyValue(char seperator, String key, Object value){
+		
+	}
+	
 }
