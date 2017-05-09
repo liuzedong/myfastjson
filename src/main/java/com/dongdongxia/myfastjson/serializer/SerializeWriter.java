@@ -316,7 +316,18 @@ public final class SerializeWriter extends Writer{
 	
 	@Override
 	public void flush() throws IOException {
+		if (writer == null) {
+			return ;
+		}
 		
+		try {
+			writer.write(buf, 0, count); // 将将数组中的内容,全部写出去
+			writer.flush();
+		} catch (IOException e) {
+			throw new JSONException(e.getMessage(), e);
+		}
+		// 将count 清零
+		count = 0;
 	}
 
 	@Override
