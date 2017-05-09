@@ -3,6 +3,8 @@ package com.dongdongxia.myfastjson.serializer;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+
+import com.dongdongxia.myfastjson.JSONException;
 /**
  * 
  * <P>Description: 序列化输出</P>
@@ -199,6 +201,31 @@ public final class SerializeWriter extends Writer{
 		}
 	}
 
+	/**
+	 * 
+	 * <p>Title: getMaxBufSize</p>
+	 * <p>Description: 获取最大缓冲区大小</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年5月9日 上午10:36:25
+	 */
+	public int getMaxBufSize() {
+		return maxBufSize;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: setMaxBufSize</p>
+	 * <p>Description: 设置最大缓冲区大小</p>
+	 * @param maxBufSize 最大缓冲区大小
+	 * @author java_liudong@163.com  2017年5月9日 上午10:37:31
+	 */
+	public void setMaxBufSize(int maxBufSize) {
+		if (maxBufSize < this.buf.length) {
+			throw new JSONException("must > " + buf.length);
+		}
+		this.maxBufSize = maxBufSize;
+	}
+	
 	@Override
 	public void flush() throws IOException {
 		// TODO Auto-generated method stub
