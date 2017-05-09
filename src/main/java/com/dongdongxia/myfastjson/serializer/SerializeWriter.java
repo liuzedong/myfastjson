@@ -287,6 +287,7 @@ public final class SerializeWriter extends Writer{
 	@Override
 	public void write(int c) throws IOException {
 		int newcount = count + 1;
+		// 下面的判断是, 如果,新加 的长度, 如果查过原有的容器大小, 且 没有writer那么就扩容, 不然,就写出,然后再扩容
 		if (newcount > buf.length) {
 			if (writer == null) {
 				expandCapacity(newcount);
@@ -310,7 +311,9 @@ public final class SerializeWriter extends Writer{
 		
 		int newcount = count + len;
 		if (newcount > buf.length){
-			
+			if (writer == null) {
+				
+			}
 		}
 	}
 	
