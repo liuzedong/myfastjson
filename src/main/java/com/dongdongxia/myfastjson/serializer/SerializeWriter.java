@@ -332,8 +332,14 @@ public final class SerializeWriter extends Writer{
 
 	@Override
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		
+		// 不为空, 先将 数据进行 写出,然后在关闭
+		if (writer != null && count > 0) {
+			flush();
+		}
+		if (buf.length <= 1024 * 64) { // 检测 ,入过 buf 小于64M , 那么就将 数据保存到 本地的一个缓存中. bufLocal中
+			bufLocal.set(buf);
+		}
+		this.buf = null; // 然后,将数组清空
 	}
 
 	/**
