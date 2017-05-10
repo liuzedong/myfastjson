@@ -349,6 +349,43 @@ public final class SerializeWriter extends Writer{
 		count = newcount;
 	}
 	
+	/**
+	 * 
+	 * <p>Title: write</p>
+	 * <p>Description: TODO</p>
+	 * @param str 写入的字符串
+	 * @param off 写入的起始位置
+	 * @param len 写入的长度
+	 * @author java_liudong@163.com  2017年5月10日 上午11:13:06
+	 * @see java.io.Writer#write(java.lang.String, int, int)
+	 */
+	@Override
+	public void write(String str, int off, int len) {
+		int newcount = count + len;
+		// 长度不够, 那么就扩容, 有writer, 则先把2048的字节写出
+		if (newcount > buf.length) {
+			if (writer == null) {
+				expandCapacity(newcount);
+			} else {
+				do {
+					// 2048 - 48 = 2000
+					int rest = buf.length - count;
+					// 将str的 信息, 底层, 起始 就是  System.arraycopy(Object src,  int  srcPos, Object dest, int destPos, int length);
+					// 0 , 2000, buf, 48    count, 开始写入的位置, 下面的方法, 其实,就是buf 的2048 给填满啦
+					str.getChars(off, off + rest, buf, count);
+					count = buf.length; // 因为填满啦, 所以此处的count= 2048, 如果指定勒大小,就是initCount的值
+					flush();
+					len -= rest; // 剩下的长度
+					off += rest; // 剩下的起始位置
+				} while (len > buf.length);
+				newcount = len;
+			}
+		}
+		// 第二个参数, 为 写入的 结束位置, 不是 写入的长度
+		str.getChars(off, off + len, buf, count);
+		count = newcount;
+	}
+
 	@Override
 	public void flush() {
 		if (writer == null) {
