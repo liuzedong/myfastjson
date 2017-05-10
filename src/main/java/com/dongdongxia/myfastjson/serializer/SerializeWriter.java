@@ -448,6 +448,21 @@ public final class SerializeWriter extends Writer{
 		return this;
 	}
 	
+	/**
+	 * 
+	 * <p>Title: append</p>
+	 * <p>Description: 追加单个字符</p>
+	 * @param c 追加字符
+	 * @return
+	 * @author java_liudong@163.com  2017年5月10日 下午12:02:31
+	 * @see java.io.Writer#append(char)
+	 */
+	@Override
+	public SerializeWriter append(char c) {
+		write(c);
+		return this;
+	}
+	
 	@Override
 	public void flush() {
 		if (writer == null) {
