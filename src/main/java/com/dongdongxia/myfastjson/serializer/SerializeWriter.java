@@ -386,6 +386,34 @@ public final class SerializeWriter extends Writer{
 		count = newcount;
 	}
 
+	/**
+	 * 
+	 * <p>Title: write</p>
+	 * <p>Description: 写入一个字符串</p>
+	 * @param str
+	 * @author java_liudong@163.com  2017年5月10日 上午11:41:21
+	 * @see java.io.Writer#write(java.lang.String)
+	 */
+	@Override
+	public void write(String text) {
+		if (text == null) {
+			writeNull();
+			return;
+		}
+		
+		write(text, 0, text.length());
+	}
+	
+	/**
+	 * 
+	 * <p>Title: writeNull</p>
+	 * <p>Description: 写入null 字符串, 用在, 如果字符串对象为NULL 的情况</p>
+	 * @author java_liudong@163.com  2017年5月10日 上午11:42:22
+	 */
+	public void writeNull() {
+		write("null");
+	}
+	
 	@Override
 	public void flush() {
 		if (writer == null) {
