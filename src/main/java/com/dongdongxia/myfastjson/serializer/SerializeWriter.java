@@ -340,7 +340,7 @@ public final class SerializeWriter extends Writer{
 					len -= rest;
 					// off 是复制的起始位置, 将位置添加上已经复制的长度,等于现在的大小
 					off += rest;
-				} while (len > buf.length); // 
+				} while (len > buf.length); // 每2048 个字节,就先写出去
 				newcount = len;
 			}
 		}
