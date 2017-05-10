@@ -366,7 +366,7 @@ public final class SerializeWriter extends Writer{
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		// 不为空, 先将 数据进行 写出,然后在关闭
 		if (writer != null && count > 0) {
 			flush();
