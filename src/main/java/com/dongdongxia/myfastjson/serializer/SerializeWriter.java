@@ -414,6 +414,23 @@ public final class SerializeWriter extends Writer{
 		write("null");
 	}
 	
+	/**
+	 * 
+	 * <p>Title: append</p>
+	 * <p>Description: 缓存中追加字符串</p>
+	 * @param csq 追加的字符串
+	 * @return
+	 * @author java_liudong@163.com  2017年5月10日 上午11:46:20
+	 * @see java.io.Writer#append(java.lang.CharSequence)
+	 */
+	@Override
+	public SerializeWriter append(CharSequence csq) {
+		String s = (csq == null ? "null" : csq.toString());
+		write(s, 0, s.length());
+		return this;
+	}
+	
+	
 	@Override
 	public void flush() {
 		if (writer == null) {
