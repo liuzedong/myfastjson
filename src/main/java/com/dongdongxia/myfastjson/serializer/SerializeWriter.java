@@ -401,4 +401,13 @@ public final class SerializeWriter extends Writer{
 		System.arraycopy(buf, 0, newValue, 0, count);
 		buf = newValue;
 	}
+
+	/**
+	 * toString, 将缓存中的数据, 进行输出
+	 */
+	@Override
+	public String toString() {
+		return new String(buf, 0, count);
+	}
+	
 }
