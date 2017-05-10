@@ -406,6 +406,23 @@ public final class SerializeWriter extends Writer{
 	
 	/**
 	 * 
+	 * <p>Title: writeTo</p>
+	 * <p>Description: 输出到指定的输出流中</p>
+	 * @param out 自定的输出流
+	 * @throws IOException
+	 * @author java_liudong@163.com  2017年5月10日 下午12:22:33
+	 */
+	public void writeTo(Writer out) throws IOException {
+		// 是指,当前没有指定writer对象, 才能使用
+		if (this.writer != null) {
+			throw new UnsupportedOperationException("writer not null, 就是当前对象,有指定的 writer 对象");
+		}
+		// 将 缓存中的数据, 写出去
+		out.write(buf, 0, count);
+	}
+	
+	/**
+	 * 
 	 * <p>Title: writeNull</p>
 	 * <p>Description: 写入null 字符串, 用在, 如果字符串对象为NULL 的情况</p>
 	 * @author java_liudong@163.com  2017年5月10日 上午11:42:22
