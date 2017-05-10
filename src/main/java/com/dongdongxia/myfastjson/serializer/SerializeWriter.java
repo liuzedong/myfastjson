@@ -429,7 +429,24 @@ public final class SerializeWriter extends Writer{
 		write(s, 0, s.length());
 		return this;
 	}
-	
+
+	/**
+	 * 
+	 * <p>Title: append</p>
+	 * <p>Description: 追加部分字符串</p>
+	 * @param csq 追加字符串
+	 * @param start 追加字符串的起始位置
+	 * @param end 追加字符串的结束位置
+	 * @return
+	 * @author java_liudong@163.com  2017年5月10日 上午11:49:05
+	 * @see java.io.Writer#append(java.lang.CharSequence, int, int)
+	 */
+	@Override
+	public SerializeWriter append(CharSequence csq, int start, int end) {
+		String s = (csq == null ? "null" : csq).subSequence(start, end).toString();
+		write(s, 0, s.length());
+		return this;
+	}
 	
 	@Override
 	public void flush() {
