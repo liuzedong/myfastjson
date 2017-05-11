@@ -1,10 +1,12 @@
 package com.dongdongxia.myfastjson.serializer;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
 import com.dongdongxia.myfastjson.JSONException;
+import com.dongdongxia.myfastjson.util.IOUtils;
 /**
  * 
  * <P>Description: 序列化输出</P>
@@ -423,6 +425,55 @@ public final class SerializeWriter extends Writer{
 	
 	/**
 	 * 
+	 * <p>Title: writeToEx</p>
+	 * <p>Description: 输出到指定的字节流中,并指定编码格式</p>
+	 * @param out 字节流
+	 * @param charset 编码格式
+	 * @return 写出流的最后字节位置
+	 * @author java_liudong@163.com  2017年5月10日 下午12:26:45
+	 * @throws IOException 
+	 */
+	public int writeToEx(OutputStream out, Charset charset) throws IOException {
+		if (this.writer != null) {
+			throw new UnsupportedOperationException("write not null");
+		}
+		// 如果编码是UTF8,那么就直接 将数据输出到out字节流中
+		if (charset == UTF8) {
+			return encodeToUTF8(out);
+		} else {
+			byte[] bytes = new String(buf, 0, count).getBytes();
+			out.write(bytes);
+			return bytes.length;
+		}
+	}
+	
+	/**
+	 * 
+	 * <p>Title: writeTo</p>
+	 * <p>Description: 将缓冲中的数据, 输出到指定的字节流中</p>
+	 * @param out 指定的字节流
+	 * @param charsetName 编码格式
+	 * @author java_liudong@163.com  2017年5月10日 下午12:24:48
+	 */
+	public void writeTo(OutputStream out, String charsetName) throws IOException {
+		writeTo(out, Charset.forName(charsetName));
+	}
+	
+	/**
+	 * 
+	 * <p>Title: writeTo</p>
+	 * <p>Description: 通过字节流,写出缓存中的内容</p>
+	 * @param out 字节流
+	 * @param charset 指定编码集
+	 * @throws IOException
+	 * @author java_liudong@163.com  2017年5月11日 下午7:51:32
+	 */
+	public void writeTo(OutputStream out, Charset charset) throws IOException {
+		writeToEx(out, charset);
+	}
+	
+	/**
+	 * 
 	 * <p>Title: writeNull</p>
 	 * <p>Description: 写入null 字符串, 用在, 如果字符串对象为NULL 的情况</p>
 	 * @author java_liudong@163.com  2017年5月10日 上午11:42:22
@@ -541,4 +592,34 @@ public final class SerializeWriter extends Writer{
 		return new String(buf, 0, count);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: encodeToUTF8</p>
+	 * <p>Description: 将缓冲区中的数据, 以UTF8的编码格式,输出到指定的字节流中</p>
+	 * @param out 字节流
+	 * @return
+	 * @author java_liudong@163.com  2017年5月10日 下午12:30:44
+	 * @throws IOException 
+	 */
+	private int encodeToUTF8(OutputStream out) throws IOException {
+		// 给缓存中的长度, 做一个扩容, 因为 char中可能 是字符
+		int bytesLength = (int) (count * (double) 3);
+		// 先检测本地是否有 字节信息保存着
+		byte[] bytes = bytesBufLocal.get();
+		
+		if (bytes == null) {
+			bytes = new byte[1024 * 8]; // 初始化个8K 空间吧
+			bytesBufLocal.set(bytes);
+		}
+		
+		if (bytes.length < bytesLength) {
+			bytes = new byte[bytesLength];
+		}
+		
+		// 将buf缓冲区中的数据,以UTF8编码转换
+		int position = IOUtils.encodeUTF8(buf, 0, count, bytes);
+		// 将数据以流的形式写出去
+		out.write(bytes, 0, position);
+		return position;
+	}
 }
