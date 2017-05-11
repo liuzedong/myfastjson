@@ -548,7 +548,22 @@ public final class SerializeWriter extends Writer{
 		return newValue;
 	}
 	
-	
+	/**
+	 * 
+	 * <p>Title: toCharArrayForSpringSocket</p>
+	 * <p>Description: 用于 spring socket中的, 少勒点东西</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年5月11日 下午8:01:25
+	 */
+	public char[] toCharArrayForSpringSocket() {
+		if (this.writer != null) {
+			throw new UnsupportedOperationException("writer not null");
+		}
+		
+		char[] newValue = new char[count - 2];
+		System.arraycopy(buf, 1, newValue, 0, count - 2);
+		return newValue;
+	}
 	
 	@Override
 	public void flush() {
