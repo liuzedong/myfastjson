@@ -441,7 +441,7 @@ public final class SerializeWriter extends Writer{
 		if (charset == UTF8) {
 			return encodeToUTF8(out);
 		} else {
-			byte[] bytes = new String(buf, 0, count).getBytes();
+			byte[] bytes = new String(buf, 0, count).getBytes(charset);
 			out.write(bytes);
 			return bytes.length;
 		}
@@ -563,6 +563,38 @@ public final class SerializeWriter extends Writer{
 		char[] newValue = new char[count - 2];
 		System.arraycopy(buf, 1, newValue, 0, count - 2);
 		return newValue;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: toBytes</p>
+	 * <p>Description: 缓存数据,指定格式转换为byte[]</p>
+	 * @param charsetName 字符串形式的编码格式
+	 * @return
+	 * @author java_liudong@163.com  2017年5月11日 下午8:16:34
+	 */
+	public byte[] toBytes(String charsetName) {
+		return toBytes(charsetName == null || "UTF-8".equals(charsetName) ? UTF8 : Charset.forName(charsetName));
+	}
+	
+	/**
+	 * 
+	 * <p>Title: toBytes</p>
+	 * <p>Description: 缓存数据,指定格式转换为byte[]</p>
+	 * @param charset 编码格式
+	 * @return 字节数据
+	 * @author java_liudong@163.com  2017年5月11日 下午8:15:15
+	 */
+	public byte[] toBytes(Charset charset) {
+		if (this.writer != null) {
+			throw new UnsupportedOperationException("writer not null");
+		}
+		
+		if (charset == UTF8) {
+			return encodeToUTF8Bytes();
+		} else {
+			return new String(buf, 0, count).getBytes(charset);
+		}
 	}
 	
 	@Override
