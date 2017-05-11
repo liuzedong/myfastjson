@@ -531,6 +531,25 @@ public final class SerializeWriter extends Writer{
 		return this;
 	}
 	
+	/**
+	 * 
+	 * <p>Title: toCharArray</p>
+	 * <p>Description: 将缓存中的数据,复制到新的char[] 缓存中, 这个新的缓存,将会不会有多余的null空间</p>
+	 * @return 返回只有数据的缓存
+	 * @author java_liudong@163.com  2017年5月11日 下午7:58:09
+	 */
+	public char[] toCharArray() {
+		if (this.writer != null) {
+			throw new UnsupportedOperationException("writer not null");
+		}
+		
+		char[] newValue = new char[count];
+		System.arraycopy(buf, 0, newValue, 0, count);
+		return newValue;
+	}
+	
+	
+	
 	@Override
 	public void flush() {
 		if (writer == null) {
