@@ -597,6 +597,20 @@ public final class SerializeWriter extends Writer{
 		}
 	}
 	
+	/**
+	 * 
+	 * <p>Title: size</p>
+	 * <p>Description: 返回缓冲区内容大小</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年5月11日 下午8:20:11
+	 */
+	public int size() {
+		return count;
+	}
+	
+	
+	
+	
 	@Override
 	public void flush() {
 		if (writer == null) {
