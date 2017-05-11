@@ -656,4 +656,33 @@ public final class SerializeWriter extends Writer{
 		out.write(bytes, 0, position);
 		return position;
 	}
+	
+	/**
+	 * 
+	 * <p>Title: encodeToUTF8Bytes</p>
+	 * <p>Description: 将数据以UTF8编码,转换为 字节数组</p>
+	 * @return 缓存的字节数据
+	 * @author java_liudong@163.com  2017年5月11日 下午8:10:17
+	 */
+	private byte[] encodeToUTF8Bytes() {
+		int bytesLength = (int) (count * (double) 3);
+		byte[] bytes = bytesBufLocal.get();
+		
+		if (bytes == null) {
+			bytes = new byte[1024 * 8];
+			bytesBufLocal.set(bytes);
+		}
+		
+		if (bytes.length < bytesLength) {
+			bytes =  new byte[bytesLength];
+		}
+		
+		int position = IOUtils.encodeUTF8(buf, 0, count, bytes);
+		// 新建一个 字节数组, 用来装 缓存中的数据
+		byte[] copy = new byte[position];
+		System.arraycopy(bytes, 0, copy, 0, position);
+		return copy;
+	}
+	
+	
 }
