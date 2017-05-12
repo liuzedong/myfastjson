@@ -484,6 +484,45 @@ public final class SerializeWriter extends Writer{
 	
 	/**
 	 * 
+	 * <p>Title: writeNull</p>
+	 * <p>Description: 设置输出null 的属性, 比如,0 是否输出为null, false是否输出为null</p>
+	 * @param feature 
+	 * @author java_liudong@163.com  2017年5月12日 下午3:20:17
+	 */
+	public void writeNull(SerializerFeature feature) {
+		writeNull(0, feature.mask);
+	}
+	
+	/**
+	 * 
+	 * <p>Title: writeNull</p>
+	 * <p>Description: 根据指定特性,向缓冲区中存入指定类型的空</p>
+	 * @param beanFeatures
+	 * @param feature
+	 * @author java_liudong@163.com  2017年5月12日 下午3:10:07
+	 */
+	public void writeNull(int beanFeatures, int feature) {
+		// 两个没有交集, 那么就输出null 字符串
+		if ((beanFeatures & feature) == 0 && (this.features & feature) == 0) {
+			writeNull();
+			return ;
+		}
+		
+		if (feature == SerializerFeature.WriteNullListAsEmpty.mask) { // 如果数组为空
+			write("[]");
+		} else if (feature == SerializerFeature.WriteNullStringAsEmpty.mask) { // 如果字符串为空
+			write("");
+		} else if (feature == SerializerFeature.WriteNullBooleanAsFalse.mask) { // Boolean值 为false
+			write("false");
+		} else if (feature == SerializerFeature.WriteNullNumberAsZero.mask) { // 如果数字为0
+			write("0");
+		} else { // 其他为null的情况, 都输出 null 字符串
+			writeNull();
+		}
+	}
+	
+	/**
+	 * 
 	 * <p>Title: writeInt</p>
 	 * <p>Description: 向缓冲中,添加一个int, 以每位 的字符存储</p>
 	 * @param i int数据
