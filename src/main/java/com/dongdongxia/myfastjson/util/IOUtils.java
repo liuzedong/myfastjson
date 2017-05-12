@@ -27,7 +27,6 @@ public class IOUtils {
 	// 用来,在指定的字符上, 标识,这个数字为真, A-Z(65-90), a-z(97-122), _(95), 0-9
 	public final static boolean identifierFlags[] = new boolean[256];
 	
-	
 	static {
 		// 此处的c=0, 是指,从ASCII码表的 第一个字符开始
 		for (char c = 0; c < identifierFlags.length; ++c){
@@ -77,6 +76,25 @@ public class IOUtils {
 				inputStream.close();
 			} catch (IOException e) {
 				// skip
+			}
+		}
+	}
+	
+	//  数组中的数据, 用来标识个没十进制 位数的最大值,Int类型的, 主要是用来算出 每个数字的长度
+	static final int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, Integer.MAX_VALUE};
+	
+	/**
+	 * 
+	 * <p>Title: stringSize</p>
+	 * <p>Description: 计算出x数组的,长度.比如:243114, 长度是6, 这个方法,其实是在Integer里面有的</p>
+	 * @param x 计算的数字
+	 * @return
+	 * @author java_liudong@163.com  2017年5月12日 下午1:55:12
+	 */
+	public static int stringSize(int x) {
+		for (int i = 0; ; i++) {
+			if (x < sizeTable[i]) {
+				return i + 1; // 因为数组,下标是从0开始的, 所以+1
 			}
 		}
 	}
