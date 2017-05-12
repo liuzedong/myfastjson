@@ -484,6 +484,40 @@ public final class SerializeWriter extends Writer{
 	
 	/**
 	 * 
+	 * <p>Title: writeInt</p>
+	 * <p>Description: 向缓冲中,添加一个int, 以每位 的字符存储</p>
+	 * @param i int数据
+	 * @author java_liudong@163.com  2017年5月12日 下午2:37:47
+	 */
+	public void writeInt(int i) {
+		// 如果最小, 就直接把这个数字写出去, 这个数字,Int的最小值
+		if (i == Integer.MIN_VALUE) {
+			write("-2147483648");
+			return ;
+		}
+		
+		// +1 , 是因为负数, 前面有个负号(-)
+		int size = (i < 0) ? IOUtils.stringSize(-i) + 1 : IOUtils.stringSize(i);
+		
+		int newcount = count + size; 
+		if (newcount > buf.length) {
+			if (writer == null) {
+				expandCapacity(newcount);
+			} else {
+				char [] chars = new char[size];
+				IOUtils.getChars(i, 0, chars);
+				write(chars, 0, chars.length);
+				return ;
+			}
+		}
+		
+		IOUtils.getChars(i, newcount, buf);
+		count = newcount;
+	}
+	
+	
+	/**
+	 * 
 	 * <p>Title: append</p>
 	 * <p>Description: 缓存中追加字符串</p>
 	 * @param csq 追加的字符串
