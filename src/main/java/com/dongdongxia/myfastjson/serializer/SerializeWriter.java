@@ -145,7 +145,30 @@ public final class SerializeWriter extends Writer{
 //		computeFeatures();
 	}
 	
-	
+	/**
+	 * 
+	 * <p>Title: config</p>
+	 * <p>Description: 向该类中添加 序列化的特性 , 是添加还是移除</p>
+	 * @param feature  某个特性
+	 * @param state true 为添加, false 为移除
+	 * @author java_liudong@163.com  2017年5月12日 下午3:42:37
+	 */
+	public void config(SerializerFeature feature, boolean state) {
+		if (state) {
+			features |= feature.getMask();
+			// 下面两个枚举序列化不能共存, 所以, 必须移除其中一个 WriteEnumUsingName 和 WriteEnumUsingToString
+			if (feature == SerializerFeature.WriteEnumUsingToString) {
+				features &= ~SerializerFeature.WriteEnumUsingName.getMask();
+			} else if (feature == SerializerFeature.WriteEnumUsingName) {
+				features &= ~SerializerFeature.WriteEnumUsingToString.getMask();
+			}
+			
+		} else {
+			features &= ~feature.getMask();
+		}
+		
+		computeFeatures();
+	}
 	
 	
 	// 非直接的特性
