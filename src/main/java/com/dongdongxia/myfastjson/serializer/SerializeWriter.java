@@ -662,6 +662,30 @@ public final class SerializeWriter extends Writer{
 		buf[newcount - 1] = quote;
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeFloat</p>
+	 * <p>Description: 向缓存中存入float值</p>
+	 * @param value
+	 * @param checkWriteClassName
+	 * @author java_liudong@163.com  2017年5月16日 上午10:36:35
+	 */
+	public void writeFloat(float value, boolean checkWriteClassName) {
+		// 如果为空, 或者是无限大, 则显示null
+		if (Float.isNaN(value) || Float.isInfinite(value)) {
+			writeNull();
+		} else {
+			String floatText = Float.toString(value);
+			if (isEnable(SerializerFeature.WriteNullNumberAsZero) && floatText.endsWith(".0")) {
+				floatText = floatText.substring(0, floatText.length() - 2);
+			}
+			write(floatText);
+			
+			if (checkWriteClassName && isEnable(SerializerFeature.WriteClassName)) {
+				write('F');
+			}
+		}
+	}
 	
 	/**
 	 * 
