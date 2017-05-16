@@ -742,7 +742,58 @@ public final class SerializeWriter extends Writer{
 		}
 	}
 	
-	
+	/**
+	 * 
+	 * <p>Title: writeLong</p>
+	 * <p>Description: 向缓存中写入long 数值</p>
+	 * @param i
+	 * @author java_liudong@163.com  2017年5月16日 上午10:54:02
+	 */
+	public void writeLong(long i) {
+		// 检测,是否需要 双引号
+		boolean needQuotationMark = isEnable(SerializerFeature.BrowerCompatible) 
+															&& (!isEnable(SerializerFeature.WriteClassName))
+															&& (i > 9007199254740991L || i < -9007199254740991L);
+		
+		if (i == Long.MIN_VALUE) {
+			if (needQuotationMark) {
+				write("\"-9223372036854775808\"");
+			} else {
+				write("-9223372036854775808");
+			}
+			return ;
+		}
+		
+		int size = (i < 0) ? IOUtils.stringSize(-i) + 1 : IOUtils.stringSize(i);
+		
+		int newcount = count + size;
+		if (needQuotationMark) newcount += 2; 
+		if (newcount > buf.length) {
+			if (writer == null) {
+				expandCapacity(newcount);
+			} else {
+				char[] chars = new char[size];
+				IOUtils.getChars(i, size, chars);
+				if (needQuotationMark) {
+					write('"');
+					write(chars, 0, chars.length);
+					write('"');
+				} else {
+					write(chars, 0, chars.length);
+				}
+				return ;
+			}
+		}
+		
+		if (needQuotationMark) {
+			buf[count] = '"';
+			IOUtils.getChars(i, newcount - 1, buf);
+			buf[newcount - 1] = '"';
+		} else {
+			IOUtils.getChars(i, newcount, buf);
+		}
+		count = newcount;
+	}
 	
 	/**
 	 * 
