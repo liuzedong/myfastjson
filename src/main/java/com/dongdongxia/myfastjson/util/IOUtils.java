@@ -24,6 +24,10 @@ public class IOUtils {
 	 */
 	public final static Properties DEFAULT_PROPERTIES = new Properties();
 
+	/**
+	 * Base 64的组成字符串
+	 */
+	public static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
 	
 	final static char [] DigitOnes = {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
