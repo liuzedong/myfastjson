@@ -689,6 +689,31 @@ public final class SerializeWriter extends Writer{
 	
 	/**
 	 * 
+	 * <p>Title: writeDouble</p>
+	 * <p>Description: 向缓存中写入Double的数值</p>
+	 * @param doubleValue
+	 * @param checkWriteCalssName
+	 * @author java_liudong@163.com  2017年5月16日 上午10:43:24
+	 */
+	public void writeDouble(double doubleValue, boolean checkWriteClassName) {
+		if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
+			writeNull();
+		} else {
+			String doubleText = Double.toString(doubleValue);
+			if (isEnable(SerializerFeature.WriteNullNumberAsZero) && doubleText.endsWith(".0")) {
+				doubleText = doubleText.substring(0, doubleText.length() - 2);
+			}
+			
+			write(doubleText);
+			
+			if (checkWriteClassName && isEnable(SerializerFeature.WriteClassName)) {
+				write('D');
+			}
+		}
+	}
+	
+	/**
+	 * 
 	 * <p>Title: append</p>
 	 * <p>Description: 缓存中追加字符串</p>
 	 * @param csq 追加的字符串
