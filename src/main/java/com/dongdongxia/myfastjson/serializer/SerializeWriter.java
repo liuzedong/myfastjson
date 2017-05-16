@@ -577,6 +577,91 @@ public final class SerializeWriter extends Writer{
 		count = newcount;
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeByteArray</p>
+	 * <p>Description: 此处是把byte[] 数组中的数据, 签名为Base64,进行装入到缓存中</p>
+	 * @param bytes
+	 * @author java_liudong@163.com  2017年5月16日 上午9:37:55
+	 */
+	public void writeByteArray(byte[] bytes) {
+		int bytesLen =bytes.length;
+		final char quote = useSingleQuotes ? '\'' : '"';
+		
+		if (bytesLen == 0) {
+			// 为空,及直接 写入 '' 或者 ""
+			String emptyString = useSingleQuotes ? "''" : "\"\"";
+			write(emptyString);
+			return ;
+		}
+		
+		// 获取Base64 
+		final char[] CA = IOUtils.CA;
+		
+		int eLen = (bytesLen / 3) * 3; // 算出高三为的值
+		int charsLen = ((bytesLen - 1) / 3 + 1) << 2;   // 根据原始的数组长度, 算出base64 的长度
+		
+		int offset = count;
+		int newcount = count + charsLen + 2; // 这个+2, 是加的 '' 或者 ""  这个两个 引号字符
+		if (newcount > buf.length) {
+			if (writer != null) {
+				write(quote);
+				
+				for (int s = 0; s < eLen;) {
+					int i = (bytes[s++] & 0xff) << 16 | (bytes[s++] & 0xff) << 8 | (bytes[s++] & 0xff);
+					
+					// 把三个字节变成四个字节
+					write(CA[(i >>> 18) & 0x3f]);
+					write(CA[(i >>> 12) & 0x3f]);
+					write(CA[(i >>> 6) & 0x3f]);
+					write(CA[i & 0x3f]);
+				}
+				
+				// 编码 底二位的, 具体的编码规则, 百度就有
+				int left = bytesLen = eLen;
+				if (left > 0) {
+					int i = ((bytes[eLen] & 0xff) << 10) | (left == 2 ? ((bytes[bytesLen - 1] & 0xff) << 2) : 0);
+					
+					// 设置后四尾, 最后一个是等于号
+					write(CA[i >> 12]);
+					write(CA[(i >>> 6) & 0x3f]);
+					write(left == 2 ? CA[i & 0x3f] : '=');
+					write('=');
+				}
+				write(quote);
+				return ;
+			}
+			expandCapacity(newcount);
+		}
+		
+		// 下面的是直接把, byte数组中的内容转换为Base64,写入到缓存中
+		count = newcount;
+		buf[offset++] = quote;
+		
+		// 编码24 bit
+		for (int s = 0, d = offset; s < eLen; ) { 
+			int i = (bytes[s++] & 0xff) << 16 | (bytes[s++] & 0xff) << 8 | (bytes[s++] & 0xff);
+			
+			// 把三个字节变成四个字节
+			buf[d++] = CA[(i >>> 18) & 0x3f];
+			buf[d++] = CA[(i >>> 12) & 0x3f];
+			buf[d++] = CA[(i >>> 6) & 0x3f];
+			buf[d++] = CA[i & 0x3f];
+		}
+		
+		int left = bytesLen - eLen;
+		if (left > 0) {
+			int i = ((bytes[eLen] & 0xff) << 10) | (left == 2 ? ((bytes[bytesLen - 1] & 0xff) << 2) : 0);
+			
+			// 设置后四尾, 最后一个是等于号
+			buf[newcount - 5] = CA[i >> 12];
+			buf[newcount - 4] = CA[(i >>> 6) & 0x3f];
+			buf[newcount - 3] = left == 2 ? CA[i & 0x3f] : '=';
+			buf[newcount - 2] = '=';
+		}
+		buf[newcount - 1] = quote;
+	}
+	
 	
 	/**
 	 * 
