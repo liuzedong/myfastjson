@@ -145,6 +145,23 @@ public class IOUtils {
 	
 	/**
 	 * 
+	 * <p>Title: stringSize</p>
+	 * <p>Description: 计算Long 类型的数值的长度</p>
+	 * @param x
+	 * @return
+	 * @author java_liudong@163.com  2017年5月16日 上午11:02:10
+	 */
+	public static int stringSize(long x) {
+		long p = 10;
+		for (int i = 1; i < 19; i++) {
+			if (x < p) return i;
+			p = 10 * p;
+		}
+		return 19;
+	}
+	
+	/**
+	 * 
 	 * <p>Title: getChars</p>
 	 * <p>Description: 将int 每一位,装入到char[] 数组中, 此处直接copy的Integer中的方法, 因为,Integer中没有提供, 是私有的</p>
 	 * @param i 装入的数字
