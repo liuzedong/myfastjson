@@ -175,7 +175,7 @@ public final class SerializeWriter extends Writer{
 	final static int nonDirectFeatures = 0
 			| SerializerFeature.UseSingleQuotes.mask
 			| SerializerFeature.BrowserSecure.mask
-			| SerializerFeature.BrowerCompatible.mask
+			| SerializerFeature.BrowserCompatible.mask
 			| SerializerFeature.PrettyFormat.mask
 			| SerializerFeature.WriteEnumUsingToString.mask
 			| SerializerFeature.WriteNonStringValueAsString.mask
@@ -751,7 +751,7 @@ public final class SerializeWriter extends Writer{
 	 */
 	public void writeLong(long i) {
 		// 检测,是否需要 双引号
-		boolean needQuotationMark = isEnable(SerializerFeature.BrowerCompatible) 
+		boolean needQuotationMark = isEnable(SerializerFeature.BrowserCompatible) 
 															&& (!isEnable(SerializerFeature.WriteClassName))
 															&& (i > 9007199254740991L || i < -9007199254740991L);
 		

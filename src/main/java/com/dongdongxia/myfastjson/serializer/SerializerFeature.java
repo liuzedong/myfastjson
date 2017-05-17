@@ -76,7 +76,7 @@ public enum SerializerFeature {
 	/**
 	 * 
 	 */
-	BrowerCompatible, // 将中文都会序列化为\\uXXXX格式，字节数会多一些，但是能兼容IE 6，默认为false
+	BrowserCompatible, // 将中文都会序列化为\\uXXXX格式，字节数会多一些，但是能兼容IE 6，默认为false
 	/**
 	 * 
 	 */
