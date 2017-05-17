@@ -174,7 +174,7 @@ public final class SerializeWriter extends Writer{
 	// 非直接的特性
 	final static int nonDirectFeatures = 0
 			| SerializerFeature.UseSingleQuotes.mask
-			| SerializerFeature.BrowerSecure.mask
+			| SerializerFeature.BrowserSecure.mask
 			| SerializerFeature.BrowerCompatible.mask
 			| SerializerFeature.PrettyFormat.mask
 			| SerializerFeature.WriteEnumUsingToString.mask

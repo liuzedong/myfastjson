@@ -105,7 +105,7 @@ public enum SerializerFeature {
 	/**
 	 * 
 	 */
-	BrowerSecure,
+	BrowserSecure,
 	/**
 	 * 
 	 */
