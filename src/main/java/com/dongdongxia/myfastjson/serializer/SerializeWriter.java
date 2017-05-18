@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import com.dongdongxia.myfastjson.JSONException;
 import com.dongdongxia.myfastjson.util.IOUtils;
@@ -797,7 +798,7 @@ public final class SerializeWriter extends Writer{
 	
 	/**
 	 * 
-	 * <p>Title: writeStringWithDoubleQuotes</p>
+	 * <p>Title: writeStringWithDoubleQuote</p>
 	 * <p>Description: 向缓存中添加字符串,并添加双引号, 最后还添加一个分隔符
 	 *  里面,使用到勒, 大量的重复代码, 主要, 是将字符, 转换为Unicode编码, 为主要功能
 	 *  大量,的位移, 就是为了, 计算得到字符, 对应的Unicode编码</p>
@@ -805,7 +806,7 @@ public final class SerializeWriter extends Writer{
 	 * @param seperator
 	 * @author java_liudong@163.com  2017年5月18日 上午11:00:08 - 16:18:50
 	 */
-	public void writeStringWithDoubleQuotes(String text, final char seperator) {
+	public void writeStringWithDoubleQuote(String text, final char seperator) {
 		/** 1, 入参为null 且 seperator = (char)0 的情况 */
 		if (text == null) {
 			writeNull();
@@ -1249,6 +1250,78 @@ public final class SerializeWriter extends Writer{
 		count = newcount;
 		buf[count - 2] = '\"';
 		buf[count - 1] = ':';
+	}
+	
+	/**
+	 * 
+	 * <p>Title: write</p>
+	 * <p>Description: 向缓存中存入List<String> 数组, 如果有中文或者一些特殊字符, 就会转换成为 Unicode编码</p>
+	 * @param list
+	 * @author java_liudong@163.com  2017年5月18日 下午5:02:35
+	 */
+	public void write(List<String> list) {
+		if (list.isEmpty()) {
+			write("[]");
+			return ;
+		}
+		
+		int offset = count;
+		final int initOffset = offset;
+		for (int i = 0, list_size = list.size(); i < list_size; ++i) {
+			String text = list.get(i);
+			
+			boolean hasSpecial = false; // 特殊的has值
+			if (text == null) {
+				hasSpecial = true;
+			} else {
+				for (int j = 0, len = text.length(); j < len; ++j) { // 获取 每个List中的 元素, 就是字符串, 字符串中的每个字符
+					char ch = text.charAt(j);
+					if (hasSpecial = (ch < ' ' || ch > '~' || ch == '"' || ch == '\\')) { // 检测, 这些范围內的字符, 一般中文字符的话, 就会为true
+						break ;
+					}
+				}
+			}
+			
+			if (hasSpecial) {
+				count = initOffset;
+				write('[');
+				for (int j = 0; j < list.size(); ++j) {
+					text = list.get(j);
+					if (j != 0) {
+						write(',');
+					}
+					
+					if (text == null) {
+						write("null");
+					} else {
+						writeStringWithDoubleQuote(text, (char) 0);
+					}
+				}
+				write(']');
+				return ;
+			}
+			
+			int newcount = offset + text.length() + 3;
+			if (i == list.size() - 1) {
+				newcount++;
+			}
+			if (newcount > buf.length) {
+				count = offset;
+				expandCapacity(newcount);
+			}
+			
+			if (i == 0) {
+				buf[offset++] = '[';
+			} else {
+				buf[offset++] = ',';
+			}
+			buf[offset++] = '"';
+			text.getChars(0, text.length(), buf, offset);
+			offset += text.length();
+			buf[offset++] = '"';
+		}
+		buf[offset++] = ']';
+		count = offset;
 	}
 	
 	
