@@ -797,6 +797,436 @@ public final class SerializeWriter extends Writer{
 	
 	/**
 	 * 
+	 * <p>Title: writeStringWithDoubleQuotes</p>
+	 * <p>Description: 向缓存中添加字符串,并添加双引号, 最后还添加一个分隔符
+	 *  里面,使用到勒, 大量的重复代码, 主要, 是将字符, 转换为Unicode编码, 为主要功能
+	 *  大量,的位移, 就是为了, 计算得到字符, 对应的Unicode编码</p>
+	 * @param text
+	 * @param seperator
+	 * @author java_liudong@163.com  2017年5月18日 上午11:00:08 - 16:18:50
+	 */
+	public void writeStringWithDoubleQuotes(String text, final char seperator) {
+		/** 1, 入参为null 且 seperator = (char)0 的情况 */
+		if (text == null) {
+			writeNull();
+			if (seperator != 0) {
+				write(seperator);
+			}
+			return ;
+		}
+		
+		/** 2, 计算出新的字符长度 */
+		int len = text.length();
+		int newcount = count + len + 2;
+		if (seperator != 0) {
+			newcount++;
+		}
+		
+		/** 3, 如果长度不够, 就扩容,然后写入 */
+		if (newcount > buf.length) {
+			if (writer != null) {
+				write('"');
+				
+				for (int i = 0; i < text.length(); ++i) {
+					char ch = text.charAt(i);
+					
+					if (isEnable(SerializerFeature.BrowserSecure)) {
+						if (!(ch >= '0' && ch <= '9') && !(ch >= 'a' && ch <= 'z') && !(ch >= 'A' && ch <= 'Z') && !(ch == ',') && !(ch == '.') && !(ch == '_')) {
+							write('\\');
+							write('u');
+							write(IOUtils.DIGITS[(ch >>> 12) & 15]);
+							write(IOUtils.DIGITS[(ch >>> 8) & 15]);
+							write(IOUtils.DIGITS[(ch >>> 5) & 15]);
+							write(IOUtils.DIGITS[ch & 15]);
+							continue;
+						}
+					} else if (isEnable(SerializerFeature.BrowserCompatible)) {
+						if (ch == '\b' || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t' || ch == '"' || ch == '/' || ch == '\\') {
+							write('\\');
+							write(IOUtils.replaceChars[(int) ch]);
+							continue;
+						}
+						
+						if (ch < 32) {
+							write('\\');
+							write('u');
+							write('0');
+							write('0');
+							write(IOUtils.ASCII_CHARS[ch * 2]);
+							write(IOUtils.ASCII_CHARS[ch * 2 + 1]);
+							continue;
+						}
+						
+						if (ch >= 127) {
+							write('\\');
+							write('u');
+							write(IOUtils.DIGITS[(ch >>> 12) & 15]);
+							write(IOUtils.DIGITS[(ch >>> 8) & 15]);
+							write(IOUtils.DIGITS[(ch >>> 4) & 15]);
+							write(IOUtils.DIGITS[ch & 15]);
+							continue;
+						}
+					} else {
+						if (ch < IOUtils.specicalFlags_doubleQuotes.length
+								&& IOUtils.specicalFlags_doubleQuotes[ch] != 0
+								|| (ch == '/' && isEnable(SerializerFeature.WriteSlashAsSpecial))) { // 是否写入特殊字符
+							write('\\');
+							if (IOUtils.specicalFlags_doubleQuotes[ch] == 4) {
+								write('u');
+								write(IOUtils.DIGITS[(ch >>> 12) & 15]);
+								write(IOUtils.DIGITS[(ch >>> 8) & 15]);
+								write(IOUtils.DIGITS[(ch >>> 4) & 15]);
+								write(IOUtils.DIGITS[ch & 15]);
+							} else {
+								write(IOUtils.replaceChars[ch]);
+							}
+							continue;
+						}
+					}
+					
+					write(ch);
+				}
+				write('"');
+				if (seperator != 0) {
+					write(seperator);
+				}
+				return ;
+			}
+			expandCapacity(newcount);
+		}
+		
+		// 如果长度足够, 就直接写入
+		int start = count + 1;
+		int end = start + len;
+		
+		buf[count] = '\"';
+		text.getChars(0, len, buf, start);
+		
+		count = newcount;
+		
+		/** 4, 检测是否包含浏览器安全的特性 */
+		if (isEnable(SerializerFeature.BrowserSecure)) { // 浏览器的安全性, 将入参中的特殊字符, 进行转译成为Unicode编码,除了数字,字母,,._其他都是
+			int lastSpecialIndex = -1;  // 记录下最后一个字符, 到时候,从后向前转译
+			
+			for (int i = start; i < end; ++i) {
+				char ch = buf[i];
+				// 筛选的是除了 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,._  等都认为是特殊字符,
+				// 都将转译成为Unicode编码
+				if (!(ch >= '0' && ch <= '9') && !(ch >= 'a' && ch <= 'z') && !(ch >= 'A' && ch <= 'Z') && !(ch == ',') && !(ch == '.') && !(ch == '_')) {
+					lastSpecialIndex = i;
+					newcount += 5;
+					continue;
+				}
+			}
+			
+			if (newcount > buf.length) {
+				expandCapacity(newcount);
+			}
+			count = newcount;
+			
+			// 从后向前 进行 字符, 转Unicode
+			for (int i = lastSpecialIndex; i >= start; --i) {
+				char ch = buf[i];
+				
+				// 重复将, 所有的非Unicode字符,转换成为Unicode字符
+				if (!(ch >= '0' && ch <= '9') && !(ch >= 'a' && ch <= 'z') && !(ch >= 'A' && ch <= 'Z') && !(ch == ',') && !(ch == '.') && !(ch == '_')) {
+					System.arraycopy(buf, i + 1, buf, i + 6, end -i - 1); // 将转译的6个字符, 复制到后面, 比如"\u5218\u534E""\u003D", 将复制的向后移动
+					buf[i] = '\\';
+					buf[i + 1] = 'u';
+					buf[i + 2] = IOUtils.DIGITS[(ch >>> 12) & 15];
+					buf[i + 3] = IOUtils.DIGITS[(ch >>> 8) & 15];
+					buf[i + 4] = IOUtils.DIGITS[(ch >>> 4) & 15];
+					buf[i + 5] = IOUtils.DIGITS[(ch & 15)];
+					end += 5;
+				}
+			}
+			
+			if (seperator != 0) {
+				buf[count - 2] = '\"';
+				buf[count - 1] = seperator;
+			} else {
+				buf[count - 1] = '\"';
+			}
+			return ;
+		}
+		
+		/** 5, 检测是否包含浏览器,的兼容性的特性 */
+		if (isEnable(SerializerFeature.BrowserCompatible)) { // 找出浏览器中的特殊字符, 然后进行转换成Unicode字符
+			int lastSpecialIndex = -1;
+			
+			// 先算出, 转后后使用的 长度, 是否需要扩容
+			for (int i = start; i < end; ++i) {
+				char ch = buf[i];
+				
+				if (ch == '"' || ch == '/' || ch == '\\') {
+					lastSpecialIndex = i;
+					newcount += 1;
+					continue;
+				}
+				
+				if (ch == '\b' || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t') {
+					lastSpecialIndex = i;
+					newcount += 1;
+					continue;
+				}
+				
+				if (ch < 32) {
+					lastSpecialIndex = i;
+					newcount += 5;
+					continue;
+				}
+				
+				if (ch >= 127) {
+					lastSpecialIndex = i;
+					newcount += 5;
+					continue;
+				}
+			}
+			
+			if (newcount > buf.length) {
+				expandCapacity(newcount);
+			}
+			
+			count = newcount;
+			
+			for (int i = lastSpecialIndex; i >= start; --i) {
+				char ch = buf[i];
+				
+				if (ch == '\b' || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t') {
+					System.arraycopy(buf, i + 1, buf, i + 2, end - i - 1);
+					buf[i] = '\\';
+					buf[i + 1] = IOUtils.replaceChars[(int) ch]; // 替换成为指定字符
+					end += 1;
+					continue;
+				}
+				
+				if (ch == '"' || ch == '/' || ch == '\\') {
+					System.arraycopy(buf, i + 1, buf, i + 2, end -i - 1);
+					buf[i] = '\\';
+					buf[i + 1] = ch;
+					end += 1;
+					continue;
+				}
+				
+				if (ch < 32) {
+					System.arraycopy(buf, i + 1, buf, i + 6, end - i -1);
+					buf[i] = '\\';
+					buf[i + 1] = 'u';
+					buf[i + 2] = '0';
+					buf[i + 3] = '0';
+					buf[i + 4] = IOUtils.ASCII_CHARS[ch * 2];
+					buf[i + 5] = IOUtils.ASCII_CHARS[ch * 2 + 1];
+					end += 5;
+					continue;
+				}
+				
+				if (ch > 127) {
+					System.arraycopy(buf, i + 1, buf, i + 6, end - i - 1);
+					buf[i] = '\\';
+					buf[i + 1] = 'u';
+					buf[i + 2] = IOUtils.DIGITS[(ch >>> 12) & 15];
+					buf[i + 3] = IOUtils.DIGITS[(ch >>> 8) & 15];
+					buf[i + 4] = IOUtils.DIGITS[(ch >>> 4) & 15];
+					buf[i + 5] = IOUtils.DIGITS[ch & 15];
+					end += 5;
+				}
+			}
+			
+			if (seperator != 0) {
+				buf[count - 2] = '\"';
+				buf[count - 1] = seperator;
+			} else {
+				buf[count - 1] = '\"';
+			}
+			return ;
+		}
+		
+		/** 6, 一下是啥都没有的特性, 直接进行直接特殊字符的特换 */
+		int specialCount = 0; // 特殊字符个数
+		int lastSpecialIndex = -1; // 最后一个特殊字符的位置
+		int firstSpecialIndex = -1; // 第一个特殊字符的位置
+		char lastSpecial = '\0'; //
+		
+		// 从前向后匹配
+		for (int i = start; i < end; ++i) {
+			char ch = buf[i];
+			
+			// \u2028 行分隔符 \u2029 段落分隔符, 是两个特殊字符
+			if (ch == '\u2028' || ch == '\u2029') {
+				specialCount++;
+				lastSpecialIndex = i;
+				lastSpecial = ch;
+				newcount += 4;
+				
+				if (firstSpecialIndex == -1) {
+					firstSpecialIndex = i;
+				}
+				continue;
+			}
+			
+			if (ch >= ']') {
+				// GB2312和ASCII 编码集的范围 0xA1 - 0xF7 0x00  -  0x7F
+				if (ch >= 0x7F && ch < 0xA0) {
+					if (firstSpecialIndex == -1) {
+						firstSpecialIndex = i;
+					}
+					
+					specialCount++;
+					lastSpecialIndex = i;
+					lastSpecial = ch;
+					newcount += 4;
+				}
+				continue;
+			}
+			
+			if (isSpecial(ch, this.features)) {
+				specialCount++;
+				lastSpecialIndex = i;
+				lastSpecial = ch;
+				
+				if (ch < IOUtils.specicalFlags_doubleQuotes.length && IOUtils.specicalFlags_doubleQuotes[ch] == 4) {
+					newcount += 4;
+				}
+				
+				if (firstSpecialIndex == -1) {
+					firstSpecialIndex = i;
+				}
+			}
+		}
+		
+		// 检测特殊字符,是否超过容量的体积, 进行是否扩容
+		if (specialCount > 0) {
+			newcount += specialCount;
+			if (newcount > buf.length) {
+				expandCapacity(newcount);
+			}
+			count = newcount;
+			
+			// 检测, 特殊字符
+			if (specialCount == 1) {
+				if (lastSpecial == '\u2028') {
+					int srcPos = lastSpecialIndex + 1;
+					int destPos = lastSpecialIndex + 6;
+					int LengthOfCopy = end - lastSpecialIndex - 1;
+					System.arraycopy(buf, srcPos, buf, destPos, LengthOfCopy);
+					buf[lastSpecialIndex] = '\\';
+					buf[++lastSpecialIndex] = 'u';
+					buf[++lastSpecialIndex] = '2';
+					buf[++lastSpecialIndex] = '0';
+					buf[++lastSpecialIndex] = '2';
+					buf[++lastSpecialIndex] = '8';
+				} else if (lastSpecial == '\u2029') {
+					int srcPos = lastSpecialIndex + 1;
+					int destPos = lastSpecialIndex + 6;
+					int LengthOfCopy = end - lastSpecialIndex - 1;
+					System.arraycopy(buf, srcPos, buf, destPos, LengthOfCopy);
+					buf[lastSpecialIndex] = '\\';
+					buf[++lastSpecialIndex] = 'u';
+					buf[++lastSpecialIndex] = '2';
+					buf[++lastSpecialIndex] = '0';
+					buf[++lastSpecialIndex] = '2';
+					buf[++lastSpecialIndex] = '9';
+				} else {
+					final char ch = lastSpecial;
+					if (ch < IOUtils.specicalFlags_doubleQuotes.length && IOUtils.specicalFlags_doubleQuotes[ch] == 4) {
+						int srcPos = lastSpecialIndex + 1;
+						int destPos = lastSpecialIndex + 6;
+						int LengthOfCopy = end - lastSpecialIndex - 1;
+						System.arraycopy(buf, srcPos, buf, destPos, LengthOfCopy);
+						
+						int bufIndex = lastSpecialIndex;
+						buf[bufIndex++] = '\\';
+						buf[bufIndex++] = 'u';
+						buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 12) & 15];
+						buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 8) & 15];
+						buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 4) & 15];
+						buf[bufIndex++] = IOUtils.DIGITS[ch & 15];
+					} else {
+						int srcPos = lastSpecialIndex + 1;
+						int destPos = lastSpecialIndex + 2;
+						int LengthOfCopy = end - lastSpecialIndex - 1;
+						System.arraycopy(buf, srcPos, buf, destPos, LengthOfCopy);
+						buf[lastSpecialIndex] = '\\';
+						buf[++lastSpecialIndex] = IOUtils.replaceChars[(int) ch];
+					}
+				}
+			} else if (specialCount > 1) { // 特殊字符 多于 1个以上
+				int textIndex = firstSpecialIndex - start;
+				int bufIndex = firstSpecialIndex;
+				for (int i = textIndex; i < text.length(); ++i) {
+					char ch = text.charAt(i);
+					
+					if (ch < IOUtils.specicalFlags_doubleQuotes.length 
+							&& IOUtils.specicalFlags_doubleQuotes[ch] != 0
+							&& (ch == '/' && isEnable(SerializerFeature.WriteSlashAsSpecial))) {
+						buf[bufIndex++] = '\\';
+						if (IOUtils.specicalFlags_doubleQuotes[ch] == 4) {
+							buf[bufIndex++] = 'u';
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 12) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 8) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 4) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[ch & 15];
+							end += 5;
+						} else {
+							buf[bufIndex++] = IOUtils.replaceChars[(int) ch];
+							end++;
+						}
+					} else {
+						if (ch == '\u2028' || ch == '\u2029') {
+							buf[bufIndex++] = '\\';
+							buf[bufIndex++] = 'u';
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 12) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 8) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 4) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[ch & 15];
+						} else {
+							buf[bufIndex++] = ch;
+						}
+					}
+				}
+			}
+		}
+		
+		/** 7, 检测是否有分隔符, seperator */
+		if (seperator != 0) {
+			buf[count - 2] = '\"';
+			buf[count - 1] = seperator;
+		} else {
+			buf[count - 1] = '\"';
+		}
+	}
+	
+	/**
+	 * 
+	 * <p>Title: isSpecial</p>
+	 * <p>Description: 匹配特殊字符</p>
+	 * @param ch
+	 * @param features
+	 * @return
+	 * @author java_liudong@163.com  2017年5月18日 下午3:22:06
+	 */
+	static boolean isSpecial(char ch, int features) {
+		if (ch == ' ') { // 32
+			return false;
+		}
+		
+		if (ch == '/') { //47
+			return (features & SerializerFeature.WriteSlashAsSpecial.mask) != 0;
+		}
+		
+		if (ch > '#' && ch != '\\') { // 35 && 92
+			return false;
+		}
+		
+		if (ch <= 0x1f || ch == '\\' || ch == '"') { // 31 || 92 || 34
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * 
 	 * <p>Title: append</p>
 	 * <p>Description: 缓存中追加字符串</p>
 	 * @param csq 追加的字符串
