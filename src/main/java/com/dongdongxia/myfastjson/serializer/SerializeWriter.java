@@ -1225,6 +1225,33 @@ public final class SerializeWriter extends Writer{
 		return false;
 	}
 	
+	
+	/**
+	 * 
+	 * <p>Title: writeFieldNameDirect</p>
+	 * <p>Description: 直接写字段名称, 入参为 passwd, 则写入的是 "passwd":</p>
+	 * @param text 字段名
+	 * @author java_liudong@163.com  2017年5月18日 下午4:56:38
+	 */
+	public void writeFieldNameDirect(String text) {
+		int len = text.length();
+		int newcount = count + len + 3;
+		
+		if (newcount >  buf.length) {
+			expandCapacity(newcount);
+		}
+		
+		int start = count + 1;
+		
+		buf[count] = '\"';
+		text.getChars(0, len, buf, start);
+		
+		count = newcount;
+		buf[count - 2] = '\"';
+		buf[count - 1] = ':';
+	}
+	
+	
 	/**
 	 * 
 	 * <p>Title: append</p>
