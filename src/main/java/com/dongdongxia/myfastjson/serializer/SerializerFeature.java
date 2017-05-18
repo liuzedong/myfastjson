@@ -105,7 +105,7 @@ public enum SerializerFeature {
 	/**
 	 * 
 	 */
-	BrowserSecure,
+	BrowserSecure, // 将非Unicode的字符,转译成为Unicode的字符,16进制的
 	/**
 	 * 
 	 */
