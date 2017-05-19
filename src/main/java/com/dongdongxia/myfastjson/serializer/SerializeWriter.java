@@ -1324,6 +1324,118 @@ public final class SerializeWriter extends Writer{
 		count = offset;
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeKeyWithSingleQuoteIfHasSpecial</p>
+	 * <p>Description: 给入参添加单引号, 比如 passwd , 缓存中就是 'passwd'</p>
+	 * @param text
+	 * @author java_liudong@163.com  2017年5月19日 上午9:14:14
+	 */
+	private void writeKeyWithSingleQuoteIfHasSpecial(String text) {
+		final byte[] specicalFlags_singleQuotes = IOUtils.specicalFlags_singleQuotes;
+		
+		/**1, 计算出长度*/
+		int len = text.length();
+		int newcount = count + len + 1;
+		
+		/**2, 长度超过缓存就扩容*/
+		if (newcount > buf.length) {
+			if (writer != null) {
+				if (len == 0) {
+					write('\'');
+					write('\'');
+					write(':');
+					return ;
+				}
+				
+				// 入参有值,不为空或"" 的情况
+				boolean hasSpecial = false;
+				for (int i = 0; i < len; ++i) {
+					char ch = text.charAt(i);
+					if (ch < specicalFlags_singleQuotes.length && specicalFlags_singleQuotes[ch] != 0) { // 中文之类的
+						hasSpecial =true;
+						break ;
+					}
+				}
+				
+				if (hasSpecial) {
+					write('\'');
+				}
+				
+				for (int i = 0; i < len; ++i) {
+					char ch = text.charAt(i);
+					if (ch < specicalFlags_singleQuotes.length && specicalFlags_singleQuotes[ch] != 0) { // 
+						write('\\');
+						write(IOUtils.replaceChars[(int) ch]);
+					} else {
+						write(ch);
+					}
+				}
+				if (hasSpecial) {
+					write('\'');
+				}
+				write(':');
+				return ;
+			}
+			expandCapacity(newcount);
+		}
+		
+		/**3, 未超过长度的, 进行写入*/
+		if (len == 0) { // 没有字符串
+			int newCount = count + 3;
+			if (newCount > buf.length) {
+				expandCapacity(count + 3);
+			}
+			buf[count++] = '\'';
+			buf[count++] = '\'';
+			buf[count++] = ':';
+			return ;
+		}
+		
+		int start = count;
+		int end = start + len;
+		
+		text.getChars(0, len, buf, start);
+		count = newcount;
+		
+		// 下面的是检测是否需要字符转译Unicode
+		boolean hasSpecial = false;
+		for (int i = start; i < end; ++i) {
+			char ch = buf[i];
+			if (ch < specicalFlags_singleQuotes.length && specicalFlags_singleQuotes[ch] != 0) {
+				if (!hasSpecial) {
+					newcount += 3;
+					if (newcount > buf.length) {
+						expandCapacity(newcount);
+					}
+					count = newcount;
+					
+					System.arraycopy(buf, i + 1, buf, i + 3, end - i - 1);
+					System.arraycopy(buf, 0, buf, 1, i);
+					buf[start] = '\'';
+					buf[++i] = '\\';
+					buf[++i] = IOUtils.replaceChars[(int) ch];
+					end += 2;
+					buf[count - 2] = '\'';
+					
+					hasSpecial = true;
+				} else {
+					newcount++;
+					if (newcount > buf.length) {
+						expandCapacity(newcount);
+					}
+					count = newcount;
+					
+					System.arraycopy(buf, i + 1, buf, i + 2, end - i);
+					buf[i] = '\\';
+					buf[++i] = IOUtils.replaceChars[(int) ch];
+					end++;
+				}
+			}
+		}
+		
+		buf[newcount - 1] = ':';
+	}
 	
 	/**
 	 * 
