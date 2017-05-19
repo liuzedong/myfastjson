@@ -2041,6 +2041,50 @@ public final class SerializeWriter extends Writer{
 	
 	/**
 	 * 
+	 * <p>Title: writeFieldValue</p>
+	 * <p>Description: 向缓存中写入枚举</p>
+	 * @param seperator
+	 * @param name
+	 * @param value
+	 * @author java_liudong@163.com  2017年5月19日 下午2:56:13
+	 */
+	public void writeFieldValue(char seperator, String name, Enum<?> value) {
+		if (value == null) {
+			write(seperator);
+			writeFieldName(name);
+			writeNull();
+			return ;
+		}
+		
+		if (writeEnumUsingName && !writeEnumUsingToString) {
+			writeEnumFieldValue(seperator, name, value.name());
+		} else if (writeEnumUsingToString) {
+			writeEnumFieldValue(seperator, name, value.toString());
+		} else {
+			writeFieldValue(seperator, name, value.ordinal());
+		}
+	}
+	
+	/**
+	 * 
+	 * <p>Title: writeEnumFieldValue</p>
+	 * <p>Description: TODO</p>
+	 * @param seperator
+	 * @param name
+	 * @param value
+	 * @author java_liudong@163.com  2017年5月19日 下午2:54:23
+	 */
+	private void writeEnumFieldValue(char seperator, String name, String value) {
+		if (useSingleQuotes) {
+			writeFieldValue(seperator, name, value);
+		} else {
+			writeFieldValueStringWithDoubleQuote(seperator, name, value);
+		}
+	}
+	
+	
+	/**
+	 * 
 	 * <p>Title: append</p>
 	 * <p>Description: 缓存中追加字符串</p>
 	 * @param csq 追加的字符串
