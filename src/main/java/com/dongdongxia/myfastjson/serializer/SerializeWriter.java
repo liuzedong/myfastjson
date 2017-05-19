@@ -1440,6 +1440,17 @@ public final class SerializeWriter extends Writer{
 	/**
 	 * 
 	 * <p>Title: writeFieldName</p>
+	 * <p>Description: 向缓存中添加字段名, 默认不检测, 不转译</p>
+	 * @param key
+	 * @author java_liudong@163.com  2017年5月19日 上午10:49:48
+	 */
+	public void writeFieldName(String key) {
+		writeFieldName(key, false);
+	}
+	
+	/**
+	 * 
+	 * <p>Title: writeFieldName</p>
 	 * <p>Description: 写入key值, 就是 类的字段名称</p>
 	 * @param key 字段名
 	 * @param checkSpecial 是否转译
