@@ -1990,6 +1990,54 @@ public final class SerializeWriter extends Writer{
 		buf[count - 1] = '\"';
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeFieldValueStringWithDoubleQuote</p>
+	 * <p>Description: 向缓存中添加,JavaBean的字段名和值</p>
+	 * @param seperator
+	 * @param name
+	 * @param value
+	 * @author java_liudong@163.com  2017年5月19日 下午2:51:51
+	 */
+	public void writeFieldValueStringWithDoubleQuote(char seperator, String name, String value) {
+		int nameLen = name.length();
+		int valueLen;
+		
+		int newcount = count;
+		
+		valueLen = value.length();
+		newcount += nameLen + valueLen + 6;
+		
+		if (newcount > buf.length) {
+			if (writer != null) {
+				write(seperator);
+				writeStringWithDoubleQuote(name, ':');
+				writeStringWithDoubleQuote(value, (char) 0);
+				return ;
+			}
+			expandCapacity(newcount);
+		}
+		
+		buf[count] = seperator;
+		
+		int nameStart = count + 2;
+		int nameEnd = nameStart + nameLen;
+		
+		buf[count + 1] = '\"';
+		name.getChars(0, nameLen, buf, nameStart);
+		
+		count = newcount;
+		
+		buf[nameEnd] = '\"';
+		
+		int index = nameEnd + 1;
+		buf[index++] = ':';
+		buf[index++] = '"';
+		
+		int valueStart = index;
+		value.getChars(0, valueLen, buf, valueStart);
+		buf[count - 1] = '\"';
+	}
 	
 	/**
 	 * 
