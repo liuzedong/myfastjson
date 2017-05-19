@@ -1437,6 +1437,50 @@ public final class SerializeWriter extends Writer{
 		buf[newcount - 1] = ':';
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeFieldName</p>
+	 * <p>Description: 写入key值, 就是 类的字段名称</p>
+	 * @param key 字段名
+	 * @param checkSpecial 是否转译
+	 * @author java_liudong@163.com  2017年5月19日 上午10:34:44
+	 */
+	public void writeFieldName(String key, boolean checkSpecial) {
+		if (key == null) {
+			write("null:");
+			return ;
+		}
+		
+		if (useSingleQuotes) { // 是否使用单引号
+			if (quoteFieldNames) { // 是否在后面, 添加冒号 :
+				writeStringWithSingleQuote(key);
+				write(':');
+			} else {
+				writeKeyWithSingleQuoteIfHasSpecial(key);
+			} 
+		} else {
+			if (quoteFieldNames) {
+				writeStringWithDoubleQuote(key, ':');
+			} else {
+				boolean hashSpecial = key.length() == 0;
+				for (int i = 0; i < key.length(); ++i) {
+					char ch = key.charAt(i);
+					if (SerializeWriter.isSpecial(ch, 0)) {
+						hashSpecial = true;
+						break ;
+					}
+				}
+				if (hashSpecial) {
+					writeStringWithDoubleQuote(key, ':');
+				} else {
+					write(key);
+					write(':');
+				}
+			}
+		}
+	}
+	
+	
 	
 	/**
 	 * 
