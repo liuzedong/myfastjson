@@ -1736,6 +1736,21 @@ public final class SerializeWriter extends Writer{
 		writeFloat(value, false);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeFieldValue</p>
+	 * <p>Description: 添加JavaBean字段为double类型</p>
+	 * @param seperator 前缀
+	 * @param name 字段名
+	 * @param value 字段值
+	 * @author java_liudong@163.com  2017年5月19日 上午11:35:12
+	 */
+	public void writeFieldValue(char seperator, String name, double value) {
+		write(seperator);
+		writeFieldName(name);
+		writeDouble(value, false);
+	}
+	
 	
 	
 	/**
