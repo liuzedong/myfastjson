@@ -1581,6 +1581,37 @@ public final class SerializeWriter extends Writer{
 		buf[count - 1] = '\'';
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeString</p>
+	 * <p>Description: 向缓存中添加,字符串, 并且添加后缀, 就是分隔符</p>
+	 * @param text 字符串
+	 * @param seperator 分隔符
+	 * @author java_liudong@163.com  2017年5月19日 上午10:52:23
+	 */
+	public void writeString(String text, char seperator) {
+		if (useSingleQuotes) {
+			writeStringWithSingleQuote(text);
+			write(seperator);
+		} else {
+			writeStringWithDoubleQuote(text, seperator);
+		}
+	}
+	
+	/**
+	 * 
+	 * <p>Title: writeString</p>
+	 * <p>Description: 向缓存中添加,字符串, 会检测是使用单引号还是双引号</p>
+	 * @param text 字符串
+	 * @author java_liudong@163.com  2017年5月19日 上午10:54:23
+	 */
+	public void writeString(String text) {
+		if (useSingleQuotes) {
+			writeStringWithSingleQuote(text);
+		} else {
+			writeStringWithDoubleQuote(text, (char) 0);
+		}
+	}
 	
 	/**
 	 * 
