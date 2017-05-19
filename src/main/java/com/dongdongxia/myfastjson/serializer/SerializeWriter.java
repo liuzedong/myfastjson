@@ -1631,6 +1631,53 @@ public final class SerializeWriter extends Writer{
 	
 	/**
 	 * 
+	 * <p>Title: writeFieldValue</p>
+	 * <p>Description: 写入, 键值对, 就是 javaBean的 字段名称 : 字段值</p>
+	 * @param seperator 
+	 * @param name 字段名
+	 * @param value 字段值 int
+	 * @author java_liudong@163.com  2017年5月19日 上午11:10:59
+	 */
+	public void writeFieldValue(char seperator, String name, int value) {
+		if (value == Integer.MIN_VALUE || !quoteFieldNames) { // 不添加: 号
+			write(seperator);
+			writeFieldName(name);
+			writeInt(value);
+			return ;
+		}
+		
+		int intSize = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
+		
+		int nameLen = name.length();
+		int newcount = count + nameLen + 4 + intSize; // + 4 为四个引号
+		if (newcount > buf.length) {
+			if (writer != null) {
+				write(seperator);
+				writeFieldName(name);
+				writeInt(value);
+				return ;
+			}
+			expandCapacity(newcount);
+		}
+		
+		int start = count;
+		count = newcount;
+		
+		buf[start] = seperator;
+		int nameEnd = start + nameLen + 1;
+		buf[start + 1] = keySeperator;
+		
+		name.getChars(0, nameLen, buf, start + 2); // 将name 写入到buf 中
+		
+		buf[nameEnd + 1] = keySeperator;
+		buf[nameEnd + 2] = ':';
+		
+		IOUtils.getChars(value, count, buf);
+	}
+	
+	
+	/**
+	 * 
 	 * <p>Title: append</p>
 	 * <p>Description: 缓存中追加字符串</p>
 	 * @param csq 追加的字符串
