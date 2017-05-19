@@ -1633,7 +1633,7 @@ public final class SerializeWriter extends Writer{
 	 * 
 	 * <p>Title: writeFieldValue</p>
 	 * <p>Description: 写入, 键值对, 就是 javaBean的 字段名称 : 字段值</p>
-	 * @param seperator 
+	 * @param seperator 前缀, 一般为逗号
 	 * @param name 字段名
 	 * @param value 字段值 int
 	 * @author java_liudong@163.com  2017年5月19日 上午11:10:59
@@ -1649,7 +1649,7 @@ public final class SerializeWriter extends Writer{
 		int intSize = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
 		
 		int nameLen = name.length();
-		int newcount = count + nameLen + 4 + intSize; // + 4 为四个引号
+		int newcount = count + nameLen + 4 + intSize; // + 4 name的两个引号, 和前缀, 和 : 号    比如 a"b": 中的, a"":
 		if (newcount > buf.length) {
 			if (writer != null) {
 				write(seperator);
@@ -1674,6 +1674,54 @@ public final class SerializeWriter extends Writer{
 		
 		IOUtils.getChars(value, count, buf);
 	}
+	
+	
+	/**
+	 * 
+	 * <p>Title: writeFieldValue</p>
+	 * <p>Description: 添加JavaBean字段为long类型</p>
+	 * @param seperator 前缀
+	 * @param name 字段名
+	 * @param value 字段值
+	 * @author java_liudong@163.com  2017年5月19日 上午11:19:14
+	 */
+	public void writeFieldValue(char seperator, String name, long value) {
+		if (value == Long.MIN_VALUE || !quoteFieldNames) {
+			write(seperator);
+			writeFieldName(name);
+			writeLong(value);
+			return ;
+		}
+		
+		int intSize = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
+		
+		int nameLen = name.length();
+		int newcount = count + nameLen + 4 + intSize;
+		if (newcount > buf.length) {
+			if (writer != null) {
+				write(seperator);
+				writeFieldName(name);
+				writeLong(value);
+				return ;
+			}
+			expandCapacity(newcount);
+		}
+		
+		int start = count;
+		count = newcount;
+		
+		buf[start] = seperator;
+		int nameEnd = start + nameLen + 1;
+		buf[start + 1] = keySeperator;
+		name.getChars(0, nameLen, buf, start + 2);
+		
+		buf[nameEnd + 1] = keySeperator;
+		buf[nameEnd + 2] = ':';
+		
+		IOUtils.getChars(value, count, buf);
+	}
+	
+	
 	
 	
 	/**
