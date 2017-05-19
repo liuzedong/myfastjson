@@ -1751,6 +1751,244 @@ public final class SerializeWriter extends Writer{
 		writeDouble(value, false);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeFieldValue</p>
+	 * <p>Description: 添加JavaBean字段为String类型</p>
+	 * @param seperator 前缀
+	 * @param name 字段名
+	 * @param value 字段值
+	 * @author java_liudong@163.com  2017年5月19日 上午11:37:11
+	 */
+	public void writeFieldValue(char seperator, String name, String value) {
+		if (quoteFieldNames) { // 使用引号的情况
+			if (useSingleQuotes) {
+				write(seperator);
+				writeFieldName(name);
+				if (value == null) {
+					writeNull();
+				} else {
+					writeString(value);
+				}
+			} else {
+				if (isEnable(SerializerFeature.BrowserSecure)) {
+					write(seperator);
+					writeStringWithDoubleQuote(name, ':');
+					writeStringWithDoubleQuote(value, (char) 0);
+				} else if (isEnable(SerializerFeature.BrowserCompatible)){
+					write(seperator);
+					writeStringWithDoubleQuote(name, ':');
+					writeStringWithDoubleQuote(value, (char) 0);
+				} else {
+					writeFieldValueStringWithDoubleQuoteCheck(seperator, name, value);
+				}
+			}
+		} else { // 非引号的情况
+			write(seperator);
+			writeFieldName(name);
+			if (value == null) {
+				writeNull();
+			} else {
+				writeString(value);
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * <p>Title: writeFieldValueStringWithDoubleQuoteCheck</p>
+	 * <p>Description: 检测是否使用双引号包括</p>
+	 * @param seperator
+	 * @param name
+	 * @param value
+	 * @author java_liudong@163.com  2017年5月19日 上午11:42:03
+	 */
+	public void writeFieldValueStringWithDoubleQuoteCheck(char seperator, String name, String value) {
+		int nameLen = name.length();
+		int valueLen;
+		
+		int newcount = count;
+		
+		if (value == null) {
+			valueLen = 4;
+			newcount = nameLen + 8;
+		} else {
+			valueLen = value.length();
+			newcount += nameLen + valueLen + 6;
+		}
+		
+		if (newcount > buf.length) {
+			if (writer != null) {
+				write(seperator);
+				writeStringWithDoubleQuote(name, ':');
+				writeStringWithDoubleQuote(value, (char) 0);
+				return ;
+			}
+			expandCapacity(newcount);
+		}
+		
+		buf[count] = seperator;
+		
+		int nameStart = count + 2; // 前缀加冒号
+		int nameEnd = nameStart + nameLen;
+		
+		buf[count + 1] = '\"';
+		name.getChars(0, nameLen, buf, nameStart);
+		
+		count = newcount;
+		
+		buf[nameEnd] = '\"';
+		
+		int index = nameEnd + 1;
+		buf[index++] = ':';
+		
+		// 为空的情况
+		if (value == null) {
+			buf[index++] = 'n';
+			buf[index++] = 'u';
+			buf[index++] = 'l';
+			buf[index++] = 'l';
+			return ;
+		}
+		
+		buf[index++] = '"';
+		
+		int valueStart = index;
+		int valueEnd = valueStart + valueLen;
+		
+		value.getChars(0, valueLen, buf, valueStart);
+		
+		int specialCount = 0;
+		int lastSpecialIndex = -1;
+		int firstSpecialIndex = -1;
+		char lastSpecial = '\0';
+		
+		for (int i = valueStart; i < valueEnd; ++i) {
+			char ch = buf[i];
+			
+			// 
+			if (ch >= ']') {
+				if (ch >= 0x7F && (ch == '\u2028' || ch == '\u2029' || ch < 0xA0)) {
+					if (firstSpecialIndex == -1) {
+						firstSpecialIndex = i;
+					}
+					
+					specialCount++;
+					lastSpecialIndex = i;
+					lastSpecial = ch;
+					newcount += 4;
+				}
+				continue;
+			}
+			// 
+			if (isSpecial(ch, this.features)) {
+				specialCount++;
+				lastSpecialIndex = i;
+				lastSpecial = ch;
+				
+				if (ch < IOUtils.specicalFlags_doubleQuotes.length && IOUtils.specicalFlags_doubleQuotes[ch] == 4) {
+					newcount += 4;
+				}
+				
+				if (firstSpecialIndex == -1) {
+					firstSpecialIndex = i;
+				}
+			}
+		}
+		
+		if (specialCount > 0) {
+			newcount += specialCount;
+			if (newcount > buf.length) {
+				expandCapacity(newcount);
+			}
+			count = newcount;
+			
+			if (specialCount == 1) {
+				if (lastSpecial == '\u2028') {
+					int srcPos = lastSpecialIndex + 1;
+					int destPos = lastSpecialIndex + 6;
+					int LengthOfCopy = valueEnd - lastSpecialIndex - 1;
+					System.arraycopy(buf, srcPos, buf, destPos, LengthOfCopy);
+					buf[lastSpecialIndex] = '\\';
+					buf[++lastSpecialIndex] = 'u';
+					buf[++lastSpecialIndex] = '2';
+					buf[++lastSpecialIndex] = '0';
+					buf[++lastSpecialIndex] = '2';
+					buf[++lastSpecialIndex] = '8';
+				} else if  (lastSpecial == '\u2029') {
+					int srcPos = lastSpecialIndex + 1;
+					int destPos = lastSpecialIndex + 6;
+					int LengthOfCopy = valueEnd - lastSpecialIndex - 1;
+					System.arraycopy(buf, srcPos, buf, destPos, LengthOfCopy);
+					buf[lastSpecialIndex] = '\\';
+					buf[++lastSpecialIndex] = 'u';
+					buf[++lastSpecialIndex] = '2';
+					buf[++lastSpecialIndex] = '0';
+					buf[++lastSpecialIndex] = '2';
+					buf[++lastSpecialIndex] = '9';
+				} else {
+					final char ch = lastSpecial;
+					if (ch < IOUtils.specicalFlags_doubleQuotes.length && IOUtils.specicalFlags_doubleQuotes[ch] == 4) {
+						int srcPos = lastSpecialIndex + 1;
+						int destPos = lastSpecialIndex + 6;
+						int LengthOfCopy = valueEnd - lastSpecialIndex - 1;
+						System.arraycopy(buf, srcPos, buf, destPos, LengthOfCopy);
+						
+						int bufIndex = lastSpecialIndex;
+						buf[bufIndex++] = '\\';
+						buf[bufIndex++] = 'u';
+						buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 12) & 15];
+						buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 8) & 15];
+						buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 4) & 15];
+						buf[bufIndex++] = IOUtils.DIGITS[ch & 15];
+					} else {
+						int srcPos = lastSpecialIndex + 1;
+						int destPos = lastSpecialIndex + 2;
+						int LengthOfCopy = valueEnd - lastSpecialIndex - 1;
+						System.arraycopy(buf, srcPos, buf, destPos, LengthOfCopy);
+						buf[lastSpecialIndex] = '\\';
+						buf[++lastSpecialIndex] = IOUtils.replaceChars[(int) ch];
+					}
+				}
+			} else if (specialCount > 1) {
+				int textIndex = firstSpecialIndex - valueStart;
+				int bufIndex = firstSpecialIndex;
+				for (int i = textIndex; i < value.length(); ++i) {
+					char ch = value.charAt(i);
+					
+					if (ch < IOUtils.specicalFlags_doubleQuotes.length 
+							&& IOUtils.specicalFlags_doubleQuotes[ch] != 0
+							|| (ch == '/' && isEnable(SerializerFeature.WriteSlashAsSpecial))) {
+						buf[bufIndex++] = '\\';
+						if (IOUtils.specicalFlags_doubleQuotes[ch] == 4) {
+							buf[bufIndex++] = 'u';
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 12) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 8) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 4) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[ch & 15];
+							valueEnd += 5;
+						} else {
+							buf[bufIndex++] = IOUtils.replaceChars[(int) ch];
+							valueEnd++;
+						}
+					} else {
+						if (ch == '\u2028' || ch == '\u2029') {
+							buf[bufIndex++] = '\\';
+							buf[bufIndex++] = 'u';
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 12) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 8) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[(ch >>> 4) & 15];
+							buf[bufIndex++] = IOUtils.DIGITS[ch & 15];
+							valueEnd += 5;
+						} else {
+							buf[bufIndex++] = ch;
+						}
+					}
+				}
+			}
+		}
+		buf[count - 1] = '\"';
+	}
 	
 	
 	/**
