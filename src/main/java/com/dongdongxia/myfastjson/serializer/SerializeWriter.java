@@ -1326,6 +1326,22 @@ public final class SerializeWriter extends Writer{
 	
 	/**
 	 * 
+	 * <p>Title: write</p>
+	 * <p>Description: 向缓存中,添加 boolean值的字符串</p>
+	 * @param value
+	 * @author java_liudong@163.com  2017年5月19日 上午10:57:26
+	 */
+	public void write(boolean value) {
+		if (value) {
+			write("true");
+		} else {
+			write("false");
+		}
+	}
+	
+	
+	/**
+	 * 
 	 * <p>Title: writeKeyWithSingleQuoteIfHasSpecial</p>
 	 * <p>Description: 给入参添加单引号, 比如 passwd , 缓存中就是 'passwd'</p>
 	 * @param text
