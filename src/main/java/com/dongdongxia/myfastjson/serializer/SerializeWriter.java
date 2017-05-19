@@ -3,6 +3,7 @@ package com.dongdongxia.myfastjson.serializer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -378,7 +379,7 @@ public final class SerializeWriter extends Writer{
 	/**
 	 * 
 	 * <p>Title: write</p>
-	 * <p>Description: TODO</p>
+	 * <p>Description: </p>
 	 * @param str 写入的字符串
 	 * @param off 写入的起始位置
 	 * @param len 写入的长度
@@ -2068,7 +2069,7 @@ public final class SerializeWriter extends Writer{
 	/**
 	 * 
 	 * <p>Title: writeEnumFieldValue</p>
-	 * <p>Description: TODO</p>
+	 * <p>Description: </p>
 	 * @param seperator
 	 * @param name
 	 * @param value
@@ -2082,6 +2083,24 @@ public final class SerializeWriter extends Writer{
 		}
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeFieldValue</p>
+	 * <p>Description: 向缓存中写入BigDecimal</p>
+	 * @param seperator
+	 * @param name
+	 * @param value
+	 * @author java_liudong@163.com  2017年5月19日 下午3:01:18
+	 */
+	public void writeFieldValue(char seperator, String name, BigDecimal value) {
+		write(seperator);
+		writeFieldName(name);
+		if (value == null) {
+			writeNull();
+		} else {
+			write(value.toString());
+		}
+	}
 	
 	/**
 	 * 
