@@ -3,6 +3,9 @@ package com.dongdongxia.myfastjson.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.security.AccessControlException;
 
 /**
@@ -71,5 +74,30 @@ public class TypeUtils {
 			return annotation != null;
 		}
 		return false;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: getClass</p>
+	 * <p>Description: 获取类型的反射对象</p>
+	 * @param type
+	 * @return
+	 * @author java_liudong@163.com  2017年5月23日 下午6:48:54
+	 */
+	public static Class<?> getClass(Type type) {
+		if (type.getClass() == Class.class) {
+			return (Class<?>) type;
+		}
+		
+		if (type instanceof ParameterizedType) {
+			return getClass(((ParameterizedType) type).getRawType());
+		}
+		
+		if (type instanceof TypeVariable) {
+			Type boundType = ((TypeVariable<?>) type).getBounds()[0];
+			return (Class<?>) boundType;
+		}
+		
+		return Object.class;
 	}
 }
