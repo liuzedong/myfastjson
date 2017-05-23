@@ -1,6 +1,8 @@
 package com.dongdongxia.myfastjson.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Method;
 import java.security.AccessControlException;
 
 /**
@@ -12,6 +14,9 @@ import java.security.AccessControlException;
 public class TypeUtils {
 
 	private static boolean setAccessibleEnable = true;
+	
+	private static boolean transientClassInited = false;
+	private static Class<? extends Annotation> transientClass; 
 	
 	/**
 	 * 
@@ -37,4 +42,34 @@ public class TypeUtils {
 		}
 	}
 	
+	/**
+	 * 
+	 * <p>Title: isTransient</p>
+	 * <p>Description: TODO</p>
+	 * @param method
+	 * @return
+	 * @author java_liudong@163.com  2017年5月23日 下午6:17:27
+	 */
+	@SuppressWarnings("unchecked")
+	public static boolean isTransient(Method method) {
+		if (method == null) {
+			return false;
+		}
+		
+		if (!transientClassInited) {
+			try {
+				transientClass = (Class<? extends Annotation>) Class.forName("java.beans.Transient"); // 检测这个枚举
+			} catch (Exception e) {
+				// skip
+			} finally {
+				transientClassInited = true;
+			}
+		}
+		
+		if (transientClass != null) {
+			Annotation annotation = method.getAnnotation(transientClass);
+			return annotation != null;
+		}
+		return false;
+	}
 }
