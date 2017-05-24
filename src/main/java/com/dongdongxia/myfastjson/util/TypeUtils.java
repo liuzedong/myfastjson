@@ -100,4 +100,28 @@ public class TypeUtils {
 		
 		return Object.class;
 	}
+	
+	/**
+	 * 
+	 * <p>Title: isGenericParamType</p>
+	 * <p>Description: 是否 有父类, Object 不算</p>
+	 * @param type
+	 * @return
+	 * @author java_liudong@163.com  2017年5月24日 上午10:40:02
+	 */
+	public static boolean isGenericParamType(Type type) {
+		if (type instanceof ParameterizedType) {
+			return true;
+		}
+		
+		if (type instanceof Class) {
+			Type superType = ((Class<?>) type).getGenericSuperclass();
+			if (superType == Object.class) {
+				return false;
+			}
+			return isGenericParamType(superType);
+		}
+		
+		return false;
+	}
 }
