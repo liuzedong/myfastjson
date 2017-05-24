@@ -124,4 +124,24 @@ public class TypeUtils {
 		
 		return false;
 	}
+	
+	/**
+	 * 
+	 * <p>Title: getGenericParamType</p>
+	 * <p>Description: 获取父类</p>
+	 * @param type
+	 * @return
+	 * @author java_liudong@163.com  2017年5月24日 上午10:46:50
+	 */
+	public static Type getGenericParamType(Type type) {
+		if (type instanceof ParameterizedType) {
+			return type;
+		}
+		
+		if (type instanceof Class) {
+			return getGenericParamType(((Class<?>) type).getGenericSuperclass());
+		}
+		
+		return type;
+	}
 }
