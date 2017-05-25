@@ -1,5 +1,6 @@
 package com.dongdongxia.myfastjson.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
@@ -387,6 +388,32 @@ public class FieldInfo implements Comparable<FieldInfo>{
 		}
 		
 		return this.methodAnnotation;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: getAnnotation</p>
+	 * <p>Description: 获取类上的注解</p>
+	 * @param annotationClass
+	 * @return
+	 * @author java_liudong@163.com  2017年5月25日 上午9:54:48
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+		if (annotationClass == JSONField.class) {
+			return (T) getAnnotation();
+		}
+		
+		T annotation = null;
+		if (method != null) {
+			annotation = method.getAnnotation(annotationClass); // 如果方法不为空的话,那么就返回 方法上面的注解对象
+		}
+		
+		if (annotation == null && field != null) {
+			annotation = field.getAnnotation(annotationClass); // 如果方法上面没有的话, 这个对象也不是 注解, 那么就确认下, 这个是字段上面的注解对象
+		}
+		
+		return annotation;
 	}
 	
 	@Override
