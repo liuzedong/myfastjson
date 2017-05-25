@@ -5,7 +5,7 @@ package com.dongdongxia.myfastjson.serializer;
  * @ClassName: PropertyPerFilter
  * @author java_liudong@163.com  2017年5月22日 上午11:42:05
  */
-public interface PropertyPerFilter extends SerializeFilter{
+public interface PropertyPreFilter extends SerializeFilter{
 
 	/**
 	 * 
