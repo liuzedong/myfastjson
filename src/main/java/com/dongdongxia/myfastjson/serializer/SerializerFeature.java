@@ -121,7 +121,7 @@ public enum SerializerFeature {
 	/**
 	 * 
 	 */
-	WriteBigDecimalAsPlain,
+	WriteBigDecimalAsPlain, // BigDecimal 是否带指数字段 的字符串, BigDecimal.toPlainString()
 	/**
 	 * 
 	 */
