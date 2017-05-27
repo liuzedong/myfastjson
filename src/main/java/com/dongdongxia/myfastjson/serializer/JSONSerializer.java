@@ -141,6 +141,32 @@ public class JSONSerializer extends SerializerFilterable{
 		this.context = context;
 	}
 	
+	/**
+	 * 
+	 * <p>Title: setContext</p>
+	 * <p>Description: 设置SerialContext 初始化的方法</p>
+	 * @param parent
+	 * @param object
+	 * @param fieldName
+	 * @param features
+	 * @author java_liudong@163.com  2017年5月27日 上午10:47:52
+	 */
+	public void setContext(SerialContext parent, Object object, Object fieldName, int features) {
+		this.setContext(parent, object, fieldName, features, 0);
+	}
+	
+	public void setContext(SerialContext parent, Object object, Object fieldName, int features, int fieldFeatures) {
+		if (out.disableCircularReferenceDetect) {
+			return ;
+		}
+		
+		this.context = new SerialContext(parent, object, fieldName, features, fieldFeatures); // 初始化 SerialContext对象
+		
+		if (references == null) { // 为空,就初始化, 不然, 就开始装对象吧
+			references = new IdentityHashMap<Object, SerialContext>();
+		}
+		this.references.put(object, context); // object 就是当前序列化的对象
+	}
 	
 	
 	protected final void writeKeyValue(char seperator, String key, Object value){
