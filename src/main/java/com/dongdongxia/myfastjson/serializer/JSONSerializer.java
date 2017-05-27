@@ -2,6 +2,10 @@ package com.dongdongxia.myfastjson.serializer;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import com.dongdongxia.myfastjson.JSON;
 
 /**
  * 
@@ -17,6 +21,15 @@ public class JSONSerializer extends SerializerFilterable{
 
 	private String dateFormatPattern; // 日式格式化模板
 	private DateFormat dateFormat; // 日期格式化对象
+	
+	/**
+	 * 获取默认时区
+	 */
+	protected TimeZone timeZone = JSON.defaultTimeZone;
+	/**
+	 * 获取默认的环境
+	 */
+	protected Locale locale = JSON.defaultLocale;
 	
 	/**
 	 * 
@@ -68,6 +81,22 @@ public class JSONSerializer extends SerializerFilterable{
 		return dateFormatPattern; // 没有的话, 就返回指定的 格式化模式
 	}
 	
+	/**
+	 * 
+	 * <p>Title: getDateFormat</p>
+	 * <p>Description: 获取日期格式化对象, 没有的话, 就初始化</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年5月27日 上午10:27:45
+	 */
+	public DateFormat getDateFormat() {
+		if (dateFormat == null) {
+			if (dateFormatPattern != null) {
+				dateFormat = new SimpleDateFormat(dateFormatPattern, locale);
+				dateFormat.setTimeZone(timeZone);
+			}
+		}
+		return dateFormat;
+	}
 	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
