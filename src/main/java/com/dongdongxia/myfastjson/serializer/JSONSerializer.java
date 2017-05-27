@@ -181,6 +181,18 @@ public class JSONSerializer extends SerializerFilterable{
 		this.setContext(context, object, fieldName, 0);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: popContext</p>
+	 * <p>Description: 将父类的SerialContext 赋值 到当前的SerialContext 的变量上</p>
+	 * @author java_liudong@163.com  2017年5月27日 上午10:58:58
+	 */
+	public void popContext() {
+		if (context != null) {
+			this.context = this.context.parent;
+		}
+	}
+	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
 	}
