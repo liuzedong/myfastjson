@@ -232,7 +232,48 @@ public class JSONSerializer extends SerializerFilterable{
 		return fieldName == null || fieldName instanceof Integer || fieldName instanceof String; // 
 	}
 	
-	
+	/**
+	 * 
+	 * <p>Title: writeReference</p>
+	 * <p>Description: 写入引用</p>
+	 * @param object
+	 * @author java_liudong@163.com  2017年5月27日 下午2:10:49
+	 */
+	public void writeReference(Object object) {
+		SerialContext context = this.context;
+		Object current = context.object; // 当前对象
+		
+		if (object == current) {
+			out.write("{\"$ref\":\"@\"}"); // {"$ref":"@"}
+			return ;
+		}
+		
+		SerialContext parentContext = context.parent; // 获取父类
+		
+		if (parentContext != null) {
+			if (object == parentContext.object) {
+				out.write("\"$ref\":\"..\""); // "$ref":".."
+				return ;
+			}
+		}
+		
+		
+		SerialContext rootContext = context;
+		for (;;) {
+			if (rootContext.parent == null) {
+				break ;
+			}
+			rootContext = rootContext.parent;
+		}
+		
+		if (object == rootContext.object) {
+			out.write("{\"$ref\":\"$\"}"); // {"$ref":"$"}
+		} else {
+			out.write("{\"$ref\":\""); // {"$ref":"}
+			out.write(references.get(object).toString());  // 值
+			out.write("\"}"); // "}
+		}
+	}
 	
 	
 	protected final void writeKeyValue(char seperator, String key, Object value){
