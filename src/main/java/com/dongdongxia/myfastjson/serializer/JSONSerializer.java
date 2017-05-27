@@ -2,6 +2,7 @@ package com.dongdongxia.myfastjson.serializer;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.IdentityHashMap;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -21,6 +22,12 @@ public class JSONSerializer extends SerializerFilterable{
 
 	private String dateFormatPattern; // 日式格式化模板
 	private DateFormat dateFormat; // 日期格式化对象
+	
+	/**
+	 * 多个引用
+	 */
+	protected IdentityHashMap<Object, SerialContext> references = null;
+	protected SerialContext context;
 	
 	/**
 	 * 获取默认时区
@@ -125,6 +132,16 @@ public class JSONSerializer extends SerializerFilterable{
 			this.dateFormat = null;
 		}
 	}
+	
+	public SerialContext getContext() {
+		return context;
+	}
+
+	public void setContext(SerialContext context) {
+		this.context = context;
+	}
+	
+	
 	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
