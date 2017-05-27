@@ -1,4 +1,8 @@
 package com.dongdongxia.myfastjson.serializer;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 /**
  * 
  * <P>Description: JSON序列化控制器</P>
@@ -10,6 +14,9 @@ public class JSONSerializer extends SerializerFilterable{
 	/** 两个主要对象, 用来控制配置和输出, 在构造方法中初始化*/
 	protected final SerializeConfig config;
 	public final SerializeWriter out;
+
+	private String dateFormatPattern; // 日式格式化模板
+	private DateFormat dateFormat; // 日期格式化对象
 	
 	/**
 	 * 
@@ -46,6 +53,21 @@ public class JSONSerializer extends SerializerFilterable{
 		this.out = out;
 		this.config = config;
 	}
+	
+	/**
+	 * 
+	 * <p>Title: getDateFormatPattern</p>
+	 * <p>Description: 获取日期格式化的模式</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年5月27日 上午10:19:26
+	 */
+	public String getDateFormatPattern() {
+		if (dateFormat instanceof SimpleDateFormat) {
+			return ((SimpleDateFormat) dateFormat).toPattern(); // 返回类似: yyyy-MM-dd HH:mm:ss  如果指定勒的话
+		}
+		return dateFormatPattern; // 没有的话, 就返回指定的 格式化模式
+	}
+	
 	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
