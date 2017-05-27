@@ -98,6 +98,21 @@ public class JSONSerializer extends SerializerFilterable{
 		return dateFormat;
 	}
 	
+	/**
+	 * 
+	 * <p>Title: setDateFormat</p>
+	 * <p>Description: 设置日期格式化对象</p>
+	 * @param dateFormat
+	 * @author java_liudong@163.com  2017年5月27日 上午10:36:48
+	 */
+	public void setDateFormat(DateFormat dateFormat) {
+		this.dateFormat = dateFormat;
+		if (dateFormatPattern != null) {
+			dateFormatPattern = null;
+		}
+	}
+	
+	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
 	}
