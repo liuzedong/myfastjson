@@ -45,4 +45,15 @@ public class SerializeConfig {
 	public SerializeConfig(int tableSize, boolean fieldBase) {
 		
 	}
+	
+	/**
+	 * 
+	 * <p>Title: getGlobalConfig</p>
+	 * <p>Description: 获取单例全局实例</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年5月27日 上午10:13:31
+	 */
+	public static SerializeConfig getGlobalConfig() {
+		return globalInstance;
+	}
 }
