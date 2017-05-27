@@ -1,5 +1,8 @@
 package com.dongdongxia.myfastjson;
 
+import java.util.Locale;
+import java.util.TimeZone;
+
 import com.dongdongxia.myfastjson.parser.Feature;
 import com.dongdongxia.myfastjson.serializer.SerializerFeature;
 import com.dongdongxia.myfastjson.util.IOUtils;
@@ -12,6 +15,15 @@ import com.dongdongxia.myfastjson.util.IOUtils;
  * @author java_liudong@163.com  2017年4月25日 上午10:27:10
  */
 public abstract class JSON implements JSONStreamAware, JSONAware{
+	
+	/**
+	 * 默认的 时区
+	 */
+	public static TimeZone defaultTimeZone = TimeZone.getDefault();
+	/**
+	 * 默认系统语言环境
+	 */
+	public static Locale defaultLocale = Locale.getDefault();
 
 	// 初始化, 默认解析特性
 	public static int DEFAULT_PARSER_FEATURE;
