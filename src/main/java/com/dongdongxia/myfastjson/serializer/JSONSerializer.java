@@ -11,6 +11,37 @@ public class JSONSerializer extends SerializerFilterable{
 	protected final SerializeConfig config;
 	public final SerializeWriter out;
 	
+	/**
+	 * 
+	 * <p>Title: Constructor</p>
+	 * <p>Description: 初始化默认的 写入 和 全局配置的对象</p>
+	 */
+	public JSONSerializer() {
+		this(new SerializeWriter(), SerializeConfig.getGlobalConfig());
+	}
+	
+	/**
+	 * 
+	 * <p>Title: Constructor</p>
+	 * <p>Description: 指定输出构造方法</p>
+	 * @param out 序列输出
+	 */
+	public JSONSerializer(SerializeWriter out) {
+		this(out, SerializeConfig.getGlobalConfig());
+	}
+	
+	/**
+	 * 
+	 * <p>Title: Constructor</p>
+	 * <p>Description: 指定全局配置的构造方法</p>
+	 * @param config 全局配置
+	 */
+	public JSONSerializer(SerializeConfig config) {
+		this(new SerializeWriter(), config);
+	}
+	
+	
+	
 	public JSONSerializer(SerializeWriter out, SerializeConfig config) {
 		this.out = out;
 		this.config = config;
