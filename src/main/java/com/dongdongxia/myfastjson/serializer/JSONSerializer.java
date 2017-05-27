@@ -1,5 +1,6 @@
 package com.dongdongxia.myfastjson.serializer;
 
+import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.IdentityHashMap;
@@ -191,6 +192,20 @@ public class JSONSerializer extends SerializerFilterable{
 		if (context != null) {
 			this.context = this.context.parent;
 		}
+	}
+	
+	/**
+	 * 
+	 * <p>Title: isWriteClassName</p>
+	 * <p>Description: 检测,是否写入对象的类名</p>
+	 * @param fieldType
+	 * @param obj
+	 * @return
+	 * @author java_liudong@163.com  2017年5月27日 上午11:00:53
+	 */
+	public final boolean isWriteClassName(Type fieldType, Object obj) {
+		return out.isEnable(SerializerFeature.WriteClassName)   
+				&& (fieldType != null || (out.isEnable(SerializerFeature.NotWriteRootClassName)) || context.parent != null);
 	}
 	
 	protected final void writeKeyValue(char seperator, String key, Object value){
