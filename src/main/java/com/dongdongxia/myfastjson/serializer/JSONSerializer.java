@@ -169,6 +169,18 @@ public class JSONSerializer extends SerializerFilterable{
 	}
 	
 	
+	/**
+	 * 
+	 * <p>Title: setContext</p>
+	 * <p>Description: 设置SerialContext 并设置的是父类</p>
+	 * @param object
+	 * @param fieldName
+	 * @author java_liudong@163.com  2017年5月27日 上午10:56:11
+	 */
+	public void setContext(Object object, Object fieldName) {
+		this.setContext(context, object, fieldName, 0);
+	}
+	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
 	}
