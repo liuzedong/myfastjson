@@ -208,6 +208,33 @@ public class JSONSerializer extends SerializerFilterable{
 				&& (fieldType != null || (out.isEnable(SerializerFeature.NotWriteRootClassName)) || context.parent != null);
 	}
 	
+	
+	/**
+	 * 
+	 * <p>Title: containsReference</p>
+	 * <p>Description: 容器中是有指定key的值</p>
+	 * @param value key
+	 * @return
+	 * @author java_liudong@163.com  2017年5月27日 上午11:06:09
+	 */
+	public boolean containsReference(Object value) {
+		if (references == null) {
+			return false;
+		}
+		
+		SerialContext refContext = references.get(value);
+		if (refContext == null) {
+			return false;
+		}
+		
+		Object fieldName = refContext.fieldName;
+		
+		return fieldName == null || fieldName instanceof Integer || fieldName instanceof String; // 
+	}
+	
+	
+	
+	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
 	}
