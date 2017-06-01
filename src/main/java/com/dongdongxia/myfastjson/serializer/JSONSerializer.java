@@ -356,6 +356,19 @@ public class JSONSerializer extends SerializerFilterable{
 		return out.toString();
 	}
 	
+	/**
+	 * 
+	 * <p>Title: config</p>
+	 * <p>Description: 配置输出流中的功能</p>
+	 * @param feature 功能
+	 * @param state true为添加,false为移除
+	 * @author java_liudong@163.com  2017年6月1日 下午3:42:51
+	 */
+	public void config(SerializerFeature feature, boolean state) {
+		out.config(feature, state);
+	}
+	
+	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
 	}
