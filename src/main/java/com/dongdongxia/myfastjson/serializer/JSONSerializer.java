@@ -343,6 +343,19 @@ public class JSONSerializer extends SerializerFilterable{
 		return out;
 	}
 	
+	/**
+	 * 
+	 * <p>Title: toString</p>
+	 * <p>Description: 输出为out格式化后的数据</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年6月1日 下午3:40:37
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return out.toString();
+	}
+	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
 	}
