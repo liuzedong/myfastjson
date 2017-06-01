@@ -24,6 +24,9 @@ public class JSONSerializer extends SerializerFilterable{
 	private String dateFormatPattern; // 日式格式化模板
 	private DateFormat dateFormat; // 日期格式化对象
 	
+	private int indentCount = 0; // 缩进的格式
+	private String indent = "\t"; // 缩进 是一个Tab 键
+	
 	/**
 	 * 多个引用
 	 */
@@ -303,6 +306,32 @@ public class JSONSerializer extends SerializerFilterable{
 	public boolean hasNameFilters(SerializerFilterable filterable) {
 		return (nameFilters != null && nameFilters.size() > 0) || (filterable.nameFilters != null && filterable.nameFilters.size() > 0);
 	}
+	
+	public int getIndentCount() {
+		return indentCount;
+	}
+	
+	public void incrementIndent() {
+		indentCount++;
+	}
+	
+	public void decrementIndent() {
+		indentCount--;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: println</p>
+	 * <p>Description: 输出\n 用来输出格式化</p>
+	 * @author java_liudong@163.com  2017年6月1日 下午3:35:57
+	 */
+	public void println() {
+		out.write('\n');
+		for (int i = 0; i < indentCount; ++i) {
+			out.write(indent);
+		}
+	}
+	
 	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
