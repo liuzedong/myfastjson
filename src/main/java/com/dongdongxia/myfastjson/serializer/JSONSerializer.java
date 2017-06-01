@@ -275,6 +275,34 @@ public class JSONSerializer extends SerializerFilterable{
 		}
 	}
 	
+	/**
+	 * 
+	 * <p>Title: checkValue</p>
+	 * <p>Description: TODO</p>
+	 * @param filterable
+	 * @return
+	 * @author java_liudong@163.com  2017年6月1日 下午3:23:32
+	 */
+	public boolean checkValue(SerializerFilterable filterable) {
+		return (valueFilters != null && valueFilters.size() > 0) // 检测,值过滤器是否存在
+				|| (contextValueFilters != null && contextValueFilters.size() > 0)
+				|| (filterable.valueFilters != null && filterable.valueFilters.size() > 0)
+				|| (filterable.contextValueFilters != null && filterable.contextValueFilters.size() > 0)
+				|| out.writeNonStringValueAsString; // 是否写入字符串
+	}
+	
+	
+	/**
+	 * 
+	 * <p>Title: hasNameFilters</p>
+	 * <p>Description: TODO</p>
+	 * @param filterable
+	 * @return
+	 * @author java_liudong@163.com  2017年6月1日 下午3:29:20
+	 */
+	public boolean hasNameFilters(SerializerFilterable filterable) {
+		return (nameFilters != null && nameFilters.size() > 0) || (filterable.nameFilters != null && filterable.nameFilters.size() > 0);
+	}
 	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
