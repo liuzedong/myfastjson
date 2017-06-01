@@ -368,6 +368,17 @@ public class JSONSerializer extends SerializerFilterable{
 		out.config(feature, state);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: isEnabled</p>
+	 * <p>Description: 检测输出流中,是否有指定的功能</p>
+	 * @param feature 检测的功能
+	 * @return
+	 * @author java_liudong@163.com  2017年6月1日 下午3:44:40
+	 */
+	public boolean isEnabled(SerializerFeature feature) {
+		return out.isEnable(feature);
+	}
 	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
