@@ -401,6 +401,18 @@ public class JSONSerializer extends SerializerFilterable{
 		return config;
 	}
 	
+	/**
+	 * 
+	 * <p>Title: write</p>
+	 * <p>Description: 向输出流中输出对象</p>
+	 * @param object
+	 * @author java_liudong@163.com  2017年6月1日 下午4:05:35
+	 */
+	public final void write(Object object) {
+		
+	}
+	
+	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
 	}
