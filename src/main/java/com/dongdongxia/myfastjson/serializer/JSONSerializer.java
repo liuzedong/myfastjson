@@ -380,6 +380,16 @@ public class JSONSerializer extends SerializerFilterable{
 		return out.isEnable(feature);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeNull</p>
+	 * <p>Description: 输出Null</p>
+	 * @author java_liudong@163.com  2017年6月1日 下午3:46:17
+	 */
+	public void writeNull() {
+		this.out.writeNull();
+	}
+	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
 	}
