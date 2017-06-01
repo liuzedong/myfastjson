@@ -332,6 +332,16 @@ public class JSONSerializer extends SerializerFilterable{
 		}
 	}
 	
+	/**
+	 * 
+	 * <p>Title: getWriter</p>
+	 * <p>Description: 获取输出流</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年6月1日 下午3:39:33
+	 */
+	public SerializeWriter getWriter() {
+		return out;
+	}
 	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
