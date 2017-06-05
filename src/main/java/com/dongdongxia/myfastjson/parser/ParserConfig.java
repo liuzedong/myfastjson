@@ -91,5 +91,35 @@ public class ParserConfig {
 		}
 	}
 	
-	
+	/**
+	 * 
+	 * <p>Title: getFieldFromCache</p>
+	 * <p>Description: 从缓存中获取,指定对象的Field属性</p>
+	 * @param fieldName 字段名
+	 * @param fieldCacheMap 缓存
+	 * @return
+	 * @author java_liudong@163.com  2017年6月5日 下午6:34:22
+	 */
+	public static Field getFieldFromCache(String fieldName, Map<String, Field> fieldCacheMap) {
+		Field field = fieldCacheMap.get(fieldName);
+		if (field == null) {
+			field = fieldCacheMap.get("_" + fieldName); // _name
+		}
+		
+		if (field == null) {
+			field = fieldCacheMap.get("m_" + fieldName); // m_name
+		}
+		
+		if (field == null) {
+			char c0 = fieldName.charAt(0);
+			if (c0 >= 'a' && c0 <= 'z') { // 小写变成大写,再查询缓存
+				char[] chars = fieldName.toCharArray();
+				chars[0] -= 32; // lower
+				String fieldNameX = new String(chars);
+				field = fieldCacheMap.get(fieldNameX);
+			}
+		}
+		
+		return field;
+	}
 }
