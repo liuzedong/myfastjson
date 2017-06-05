@@ -1,5 +1,8 @@
 package com.dongdongxia.myfastjson.parser;
 
+import java.lang.reflect.Field;
+import java.util.Map;
+
 import com.dongdongxia.myfastjson.util.IOUtils;
 
 /**
@@ -65,5 +68,28 @@ public class ParserConfig {
 		}
 		return null;
 	}
+	
+	/**
+	 * 
+	 * <p>Title: parserAllFieldToCache</p>
+	 * <p>Description: 将对象中的字段, 装入到Map中,进行缓存,
+	 * 生成fieldName的快照,减少之后的findField的轮循</p>
+	 * @param clazz
+	 * @param fieldCacheMap
+	 * @author java_liudong@163.com  2017年6月5日 下午4:04:49
+	 */
+	public static void parserAllFieldToCache(Class<?> clazz, Map<String, Field> fieldCacheMap) {
+		Field[] fields = clazz.getDeclaredFields();
+		for (Field field : fields) {
+			String fieldName = field.getName(); // 获取字段名称
+			if (!fieldCacheMap.containsKey(fieldName)) {
+				fieldCacheMap.put(fieldName, field);
+			}
+		}
+		if (clazz.getSuperclass() != null && clazz.getSuperclass() != Object.class) { // 检测是否有父类, 如果有, 则把父类中的字段也进行缓存,迭代
+			parserAllFieldToCache(clazz.getSuperclass(), fieldCacheMap);
+		}
+	}
+	
 	
 }
