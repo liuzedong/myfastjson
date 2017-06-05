@@ -3,10 +3,13 @@ package com.dongdongxia.myfastjson.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.security.AccessControlException;
+
+import com.dongdongxia.myfastjson.annotation.JSONField;
 
 /**
  * 
@@ -143,5 +146,95 @@ public class TypeUtils {
 		}
 		
 		return type;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: getSuperMethodAnnotation</p>
+	 * <p>Description: 检测是否父类接口字段上有这个注解</p>
+	 * @param clazz
+	 * @param method
+	 * @return
+	 * @author java_liudong@163.com  2017年6月5日 下午5:06:31
+	 */
+	public static JSONField getSuperMethodAnnotation(final Class<?> clazz, final Method method) {
+		/** ---------------------------检测接口的方法上面是否有枚举 begin--------------------------------------*/
+		Class<?>[] interfaces = clazz.getInterfaces(); // 校验接口上面的方法,是否有注解
+		if (interfaces.length > 0) {
+			Class<?>[] types = method.getParameterTypes(); // 获取方法的所有入参类型
+			for (Class<?> interfaceClass : interfaces) {
+				for (Method interfaceMethod : interfaceClass.getMethods()) { // 获取接口的所有方法
+					Class<?>[] interfaceTypes = interfaceMethod.getParameterTypes(); 
+					// 两个方法的参数,和方法名称不一样, 就不是一个方法
+					if (interfaceTypes.length != types.length) {
+						continue ;
+					}
+					if (!interfaceMethod.getName().equals(method.getName())) { 
+						continue ;
+					}
+					
+					boolean match = true;
+					for (int i = 0; i < types.length; ++i) {
+						if (!interfaceTypes[i].equals(types[i])) { // 方法参数类型是否一直
+							match = false;
+							break ;
+						}
+					}
+					
+					if (!match) {
+						continue ;
+					}
+					
+					JSONField annotation = interfaceMethod.getAnnotation(JSONField.class);
+					if (annotation != null) {
+						return annotation;
+					}
+				}
+			}
+		}
+		/** ---------------------------检测接口的方法上面是否有枚举 end--------------------------------------*/
+
+		
+		/** ---------------------------检测抽象类的方法上面是否有枚举 begin--------------------------------------*/
+		// 下面是检测 抽象父类上面的字段是否有注解
+		Class<?> superClass = clazz.getSuperclass();
+		if (superClass == null) {
+			return null;
+		}
+		
+		if (Modifier.isAbstract(superClass.getModifiers())) { // 检测是否是抽象类
+			Class<?>[] types = method.getParameterTypes();
+			
+			for (Method interfaceMethod : superClass.getMethods()) {
+				Class<?>[] interfaceTypes = interfaceMethod.getParameterTypes();
+				if (interfaceTypes.length != types.length) {
+					continue ;
+				}
+				
+				if (!interfaceMethod.getName().equals(method.getName())) {
+					continue ;
+				}
+				
+				boolean match = true;
+				for (int i = 0; i < types.length; ++i) {
+					if (!interfaceTypes[i].equals(types[i])) { // 参数类型比较
+						match = false;
+						break;
+					}
+				}
+				
+				if (!match) {
+					continue ;
+				}
+				
+				JSONField annotation = interfaceMethod.getAnnotation(JSONField.class);
+				if (annotation != null) {
+					return annotation;
+				}
+			}
+		}
+		/** ---------------------------检测抽象类的方法上面是否有枚举 end--------------------------------------*/
+
+		return null;
 	}
 }
