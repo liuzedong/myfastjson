@@ -10,6 +10,7 @@ import java.lang.reflect.TypeVariable;
 import java.security.AccessControlException;
 
 import com.dongdongxia.myfastjson.annotation.JSONField;
+import com.dongdongxia.myfastjson.annotation.JSONType;
 
 /**
  * 
@@ -236,5 +237,50 @@ public class TypeUtils {
 		/** ---------------------------检测抽象类的方法上面是否有枚举 end--------------------------------------*/
 
 		return null;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: isJSONTypeIgnore</p>
+	 * <p>Description: 检测对象上面有注解, 忽略对象中的字段</p>
+	 * @param clazz 检测的对象
+	 * @param propertyName 对象中的属性
+	 * @return 
+	 * @author java_liudong@163.com  2017年6月5日 下午6:20:12
+	 */
+	private static boolean isJSONTypeIgnore(Class<?> clazz, String propertyName) {
+		JSONType jsonType = clazz.getAnnotation(JSONType.class);
+		
+		if (jsonType != null) {
+			/**
+			 * 1, 新增 includes 支持, 如果JSONType 同时设置了includes 和 ignores 属性, 则以includes为准
+			 * 2, 个人认为对于大小写敏感的Java和JS而言, 使用equals() 比 equalsIgnoreClase()更好, 改动的唯一风险就是向后兼容的问题
+			 * 不过, 相信开发者应该严格按照大小写敏感的方式进行属性设置的
+			 */
+			String[] fields = jsonType.includes();
+			if (fields.length > 0) {
+				for (int i = 0; i < fields.length; i++) {
+					if (propertyName.equals(fields[i])) {
+						return false;
+					}
+				}
+				return true;
+			} else {
+				fields = jsonType.ignores();
+				for (int i = 0; i < fields.length; i++) {
+					if (propertyName.equals(fields[i])) {
+						return true;
+					}
+				}
+			}
+		}
+		
+		if (clazz.getSuperclass() != Object.class && clazz.getSuperclass() != null) { // 拥有父类,进行 迭代
+			if (isJSONTypeIgnore(clazz.getSuperclass(), propertyName)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }
