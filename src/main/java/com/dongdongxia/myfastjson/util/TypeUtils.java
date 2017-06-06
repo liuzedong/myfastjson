@@ -2,12 +2,14 @@ package com.dongdongxia.myfastjson.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.security.AccessControlException;
+import java.util.Map;
 
 import com.dongdongxia.myfastjson.annotation.JSONField;
 import com.dongdongxia.myfastjson.annotation.JSONType;
@@ -23,7 +25,18 @@ public class TypeUtils {
 	private static boolean setAccessibleEnable = true;
 	
 	private static boolean transientClassInited = false;
-	private static Class<? extends Annotation> transientClass; 
+	private static Class<? extends Annotation> transientClass;
+	
+	/** 根据field name 的大小写输出输入数据*/
+	public static boolean compatibleWithFieldName = false;
+	
+	static {
+		try {
+			TypeUtils.compatibleWithFieldName = "true".equals(IOUtils.getStringProperty(IOUtils.MYFASTJSON_COMPATIBLEWITHFIELDBEAN));
+		} catch (Throwable e) {
+			// skip
+		}
+	}
 	
 	/**
 	 * 
@@ -282,5 +295,27 @@ public class TypeUtils {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: getPropertyNameByCompatibleFieldName</p>
+	 * <p>Description: 获取兼容字段名称</p>
+	 * @param fieldCacheMap 字段名和字段属性的 缓存
+	 * @param methodName 方法名
+	 * @param propertyName 字段名
+	 * @param fromIdx 截取的位置
+	 * @return
+	 * @author java_liudong@163.com  2017年6月6日 上午9:31:55
+	 */
+	private static String getPropertyNameByCompatibleFieldName(Map<String, Field> fieldCacheMap, String methodName, String propertyName, int fromIdx) {
+		if (compatibleWithFieldName) {
+			if (!fieldCacheMap.containsKey(propertyName)) { // 查找不到,进入
+				String tempPropertyName = methodName.substring(fromIdx);
+				return fieldCacheMap.containsKey(tempPropertyName) ? tempPropertyName : propertyName;
+			}
+		}
+		
+		return propertyName;
 	}
 }

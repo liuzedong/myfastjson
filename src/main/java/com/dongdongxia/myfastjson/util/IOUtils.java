@@ -20,6 +20,11 @@ public class IOUtils {
 	 */
 	public final static String MYFASTJSON_PROPERTIES = "myfastjson.properties";
 	/**
+	 * 兼容字段名
+	 */
+	public final static String MYFASTJSON_COMPATIBLEWITHFIELDBEAN = "myfastjson.compatibleWithFieldName";
+	
+	/**
 	 * 默认加载的myfastjson.properties 配置文件,使用此默认Properties 对象进行加载
 	 */
 	public final static Properties DEFAULT_PROPERTIES = new Properties();
