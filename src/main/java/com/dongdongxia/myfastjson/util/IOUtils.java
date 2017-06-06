@@ -23,6 +23,10 @@ public class IOUtils {
 	 * 兼容字段名
 	 */
 	public final static String MYFASTJSON_COMPATIBLEWITHFIELDBEAN = "myfastjson.compatibleWithFieldName";
+	/**
+	 * 兼容类名
+	 */
+	public final static String MYFASTJSON_COMPATIBLEWITHJAVABEAN = "myfastjson.compatibleWithJavaBean";
 	
 	/**
 	 * 默认加载的myfastjson.properties 配置文件,使用此默认Properties 对象进行加载
