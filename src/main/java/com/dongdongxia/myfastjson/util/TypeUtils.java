@@ -318,4 +318,26 @@ public class TypeUtils {
 		
 		return propertyName;
 	}
+	
+	/**
+	 * 
+	 * <p>Title: decapotalize</p>
+	 * <p>Description: 将首字母小写</p>
+	 * @param name 方法名称
+	 * @return
+	 * @author java_liudong@163.com  2017年6月6日 上午9:46:06
+	 */
+	public static String decapotalize(String name) {
+		if (name == null || name.length() == 0) {
+			return name;
+		}
+		
+		if (name.length() > 1 && Character.isUpperCase(name.charAt(1))/*是否大写*/ && Character.isUpperCase(name.charAt(0)) /*是否大写*/) {
+			return name;
+		}
+		
+		char chars[] = name.toCharArray();
+		chars[0] = Character.toLowerCase(chars[0]);
+		return new String(chars);
+	}
 }
