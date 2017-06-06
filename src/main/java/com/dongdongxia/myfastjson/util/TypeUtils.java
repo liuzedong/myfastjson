@@ -11,8 +11,11 @@ import java.lang.reflect.TypeVariable;
 import java.security.AccessControlException;
 import java.util.Map;
 
+import com.dongdongxia.myfastjson.PropertyNamingStrategy;
 import com.dongdongxia.myfastjson.annotation.JSONField;
 import com.dongdongxia.myfastjson.annotation.JSONType;
+import com.dongdongxia.myfastjson.parser.Feature;
+import com.dongdongxia.myfastjson.serializer.SerializerFeature;
 
 /**
  * 
@@ -339,5 +342,67 @@ public class TypeUtils {
 		char chars[] = name.toCharArray();
 		chars[0] = Character.toLowerCase(chars[0]);
 		return new String(chars);
+	}
+	
+	/**
+	 * 
+	 * <p>Title: computeFields</p>
+	 * <p>Description: 计算字段名上的注解</p>
+	 * @param clazz 类名
+	 * @param aliasMap 别名MAP
+	 * @param propertyNamingStrategy 命名枚举
+	 * @param fieldInfoMap 字段名称的缓存
+	 * @param fields 字段数组
+	 * @author java_liudong@163.com  2017年6月6日 上午10:05:04
+	 */
+	private static void computeFields(Class<?> clazz, 
+			Map<String, String> aliasMap,
+			PropertyNamingStrategy propertyNamingStrategy,
+			Map<String, FieldInfo> fieldInfoMap,
+			Field[] fields) {
+		for (Field field : fields) {
+			if (Modifier.isStatic(field.getModifiers())) {
+				continue ;
+			}
+			
+			JSONField fieldAnnotation = field.getAnnotation(JSONField.class);
+			
+			int ordinal = 0, serializeFeatures = 0, parserFeatures = 0;
+			String propertyName = field.getName();
+			String label = null;
+			if (fieldAnnotation != null) {
+				if (!fieldAnnotation.serialize()) {
+					continue ;
+				}
+				
+				ordinal = fieldAnnotation.ordinal();
+				serializeFeatures = SerializerFeature.of(fieldAnnotation.serialzeFeatures());
+				parserFeatures = Feature.of(fieldAnnotation.parseFeatures());
+				
+				if (fieldAnnotation.name().length() != 0) {
+					propertyName = fieldAnnotation.name();
+				}
+				
+				if (fieldAnnotation.label().length() != 0) {
+					label = fieldAnnotation.label();
+				}
+			}
+			
+			if (aliasMap != null) {
+				propertyName = aliasMap.get(propertyName);
+				if (propertyName == null) {
+					continue ;
+				}
+			}
+			
+			if (propertyNamingStrategy != null) {
+				propertyName = propertyNamingStrategy.translate(propertyName);
+			}
+			
+			if (!fieldInfoMap.containsKey(propertyName)) {
+				FieldInfo fieldInfo = new FieldInfo(propertyName, null, field, clazz, null, ordinal, serializeFeatures, parserFeatures, null, fieldAnnotation, label);
+				fieldInfoMap.put(propertyName, fieldInfo);
+			}
+		}
 	}
 }
