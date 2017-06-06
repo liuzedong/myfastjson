@@ -9,6 +9,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.security.AccessControlException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import com.dongdongxia.myfastjson.PropertyNamingStrategy;
@@ -404,5 +407,52 @@ public class TypeUtils {
 				fieldInfoMap.put(propertyName, fieldInfo);
 			}
 		}
+	}
+	
+	
+	/**
+	 * 
+	 * <p>Title: getFieldInfos</p>
+	 * <p>Description: 把缓存中的值,转换成为List, 并检测是否排序</p>
+	 * @param clazz 类名
+	 * @param sorted 是否排序
+	 * @param fieldInfoMap 字段缓存
+	 * @return
+	 * @author java_liudong@163.com  2017年6月6日 上午10:54:09
+	 */
+	private static List<FieldInfo> getFieldInfos(Class<?> clazz, boolean sorted, Map<String, FieldInfo> fieldInfoMap) {
+		List<FieldInfo> fieldInfoList = new ArrayList<FieldInfo>();
+		
+		boolean containsAll = false;
+		String[] orders = null;
+		
+		JSONType annotation = clazz.getAnnotation(JSONType.class);
+		if (annotation != null) {
+			orders = annotation.orders();
+			
+			if (orders != null && orders.length == fieldInfoMap.size()) {
+				containsAll = true;
+				for (String item : orders) {
+					if (!fieldInfoMap.containsKey(item)) {
+						containsAll = false;
+						break ;
+					}
+				}
+			} else {
+				containsAll = false;
+			}
+		}
+		
+		
+		if (containsAll) {
+			for (FieldInfo fieldInfo : fieldInfoMap.values()) {
+				fieldInfoList.add(fieldInfo);
+			}
+			
+			if (sorted) {
+				Collections.sort(fieldInfoList);
+			}
+		}
+		return fieldInfoList;
 	}
 }
