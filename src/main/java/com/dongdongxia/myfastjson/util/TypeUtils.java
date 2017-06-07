@@ -699,31 +699,36 @@ public class TypeUtils {
 									continue ;
 								}
 							}
-							
-							if (propertyNamingStrategy != null) {
-								propertyName = propertyNamingStrategy.translate(propertyName);
-							}
-							
-							// 优先选择get
-							if (fieldInfoMap.containsKey(propertyName)) {
-								continue ;
-							}
-							
-							FieldInfo fieldInfo = new FieldInfo(propertyName, method, field, clazz, null, ordinal, serializeFeatures, parserFeatures, annotation, fieldAnnotation, label);
-							fieldInfoMap.put(propertyName, fieldInfo);
+						}
+						
+						if (fieldAnnotation.label().length() != 0) {
+							label = fieldAnnotation.label();
 						}
 					}
-					
-					Field[] fields = clazz.getFields();
-					computeFields(clazz, aliasMap, propertyNamingStrategy, fieldInfoMap, fields);
-					
-					return getFieldInfos(clazz, sorted, fieldInfoMap);
 				}
+				
+				if (aliasMap != null) {
+					propertyName = aliasMap.get(propertyName);
+					if (propertyName == null) {
+						continue ;
+					}
+				}
+				
+				if (propertyNamingStrategy != null) {
+					propertyName = propertyNamingStrategy.translate(propertyName);
+				}
+				
+				if (fieldInfoMap.containsKey(propertyName)) {
+					continue ;
+				}
+				
+				FieldInfo fieldInfo = new FieldInfo(propertyName, method, field, clazz, null, ordinal, serializeFeatures, parserFeatures, annotation, fieldAnnotation, label);
+				fieldInfoMap.put(propertyName, fieldInfo);
 			}
-			
 		}
-		
-		return null;
+		Field[] fields = clazz.getFields();
+		computeFields(clazz, aliasMap, propertyNamingStrategy, fieldInfoMap, fields);
+		return getFieldInfos(clazz, sorted, fieldInfoMap);
 	}
 
 	/**
