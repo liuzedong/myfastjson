@@ -11,6 +11,7 @@ import java.lang.reflect.TypeVariable;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import com.dongdongxia.myfastjson.PropertyNamingStrategy;
 import com.dongdongxia.myfastjson.annotation.JSONField;
 import com.dongdongxia.myfastjson.annotation.JSONType;
 import com.dongdongxia.myfastjson.parser.Feature;
+import com.dongdongxia.myfastjson.parser.ParserConfig;
 import com.dongdongxia.myfastjson.serializer.SerializerFeature;
 
 /**
@@ -27,7 +29,9 @@ import com.dongdongxia.myfastjson.serializer.SerializerFeature;
  * @author java_liudong@163.com  2017年5月23日 下午5:53:56
  */
 public class TypeUtils {
-
+	
+	public static boolean compatibleWithJavaBean = false;
+	
 	private static boolean setAccessibleEnable = true;
 	
 	private static boolean transientClassInited = false;
@@ -38,6 +42,7 @@ public class TypeUtils {
 	
 	static {
 		try {
+			TypeUtils.compatibleWithJavaBean = "true".equals(IOUtils.getStringProperty(IOUtils.MYFASTJSON_COMPATIBLEWITHJAVABEAN));
 			TypeUtils.compatibleWithFieldName = "true".equals(IOUtils.getStringProperty(IOUtils.MYFASTJSON_COMPATIBLEWITHFIELDBEAN));
 		} catch (Throwable e) {
 			// skip
@@ -455,4 +460,292 @@ public class TypeUtils {
 		}
 		return fieldInfoList;
 	}
+	
+	/**
+	 * 
+	 * <p>Title: computeGetters</p>
+	 * <p>Description: 获取对象中的所有字段,get方法的字段</p>
+	 * @param clazz 对象
+	 * @param jsonType 对象上的注解 
+	 * @param aliasMap 别名
+	 * @param fieldCacheMap 字段缓存
+	 * @param sorted 是否排序
+	 * @param propertyNamingStrategy 字段命名
+	 * @return
+	 * @author java_liudong@163.com  2017年6月6日 上午11:12:13
+	 */
+	public static List<FieldInfo> computeGetters(Class<?> clazz,
+			JSONType jsonType,
+			Map<String, String> aliasMap,
+			Map<String, Field> fieldCacheMap,
+			boolean sorted,
+			PropertyNamingStrategy propertyNamingStrategy) {
+		Map<String, FieldInfo> fieldInfoMap = new LinkedHashMap<String, FieldInfo>();
+		
+		for (Method method : clazz.getMethods()) {
+			String methodName = method.getName();
+			int ordinal = 0, serializeFeatures = 0, parserFeatures = 0;
+			String label = null;
+			
+			/**------------------------------检测方法属性 start---------------------------------*/
+			if (Modifier.isStatic(method.getModifiers())) {
+				continue ;
+			}
+			
+			if (method.getReturnType().equals(Void.TYPE)) {
+				continue ;
+			}
+			
+			if (method.getParameterTypes().length != 0) {
+				continue ;
+			}
+			
+			if (method.getReturnType() == ClassLoader.class) {
+				continue ;
+			}
+			
+			if (method.getName().equals("getMetaClass") && method.getReturnType().getName().equals("groovy.lang.MetaClass")) {
+				continue ;
+			}
+			/**------------------------------检测方法属性 end---------------------------------*/
+			
+			JSONField annotation = method.getAnnotation(JSONField.class);
+			
+			if (annotation == null) {
+				annotation = getSuperMethodAnnotation(clazz, method);
+			}
+			
+			if (annotation != null) {
+				if (!annotation.serialize()) {
+					continue ;
+				}
+				
+				ordinal = annotation.ordinal();
+				serializeFeatures = SerializerFeature.of(annotation.serialzeFeatures());
+				parserFeatures = Feature.of(annotation.parseFeatures());
+				
+				if (annotation.name().length() != 0) {
+					String propertyName = annotation.name();
+					
+					if (aliasMap != null) {
+						propertyName = aliasMap.get(propertyName);
+						if (propertyName == null) {
+							continue ;
+						}
+					}
+					
+					FieldInfo fieldInfo = new FieldInfo(propertyName, method, null, clazz, null, ordinal, serializeFeatures, parserFeatures, annotation, null, label);
+					fieldInfoMap.put(propertyName, fieldInfo);
+					continue ;
+				}
+				
+				if (annotation.label().length() != 0) {
+					label = annotation.label();
+				}
+			}
+			
+			/**------------------------------检测method的名称 start---------------------------------*/
+			if (methodName.startsWith("get")) {
+				if (methodName.length() < 4) {
+					continue ;
+				}
+				
+				if (methodName.equals("getClass")) {
+					continue ;
+				}
+				
+				if (methodName.equals("getDeclaringClass") && clazz.isEnum()) {
+					continue ;
+				}
+				
+				char c3 = methodName.charAt(3); // getName , 获取的N
+				
+				String propertyName;
+				if (Character.isUpperCase(c3) // 是否大写
+						|| c3 > 512 ) { // 是正常的字符
+					if (compatibleWithJavaBean) {
+						propertyName = decapitalize(methodName.substring(3)); // 获取方法名称
+					} else {
+						propertyName = Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4); // 首字母小写,加上加上后面的字符
+					}
+					
+					propertyName = getPropertyNameByCompatibleFieldName(fieldCacheMap, methodName, propertyName, 3);
+				} else if (c3 == '_') {
+					propertyName = methodName.substring(4);
+				} else if (c3 == 'f') {
+					propertyName = methodName.substring(3);
+				} else if (methodName.length() >= 5 && Character.isUpperCase(methodName.charAt(4))) {
+					propertyName = decapitalize(methodName.substring(3));
+				} else {
+					continue ;
+				}
+				
+				boolean ignore = isJSONTypeIgnore(clazz, propertyName);
+				
+				if (ignore) {
+					continue ;
+				}
+				
+				// 加入bean的field很多的情况下,轮循时将大大降低效率
+				Field field = ParserConfig.getFieldFromCache(propertyName, fieldCacheMap);
+				
+				if (field == null && propertyName.length() > 1) {
+					char ch = propertyName.charAt(1);
+					if (ch >= 'A' && ch <= 'Z') {
+						String javaBeanCompatiblePropertyName = decapitalize(methodName.substring(3));
+						field = ParserConfig.getFieldFromCache(javaBeanCompatiblePropertyName, fieldCacheMap);
+					}
+				}
+				
+				JSONField fieldAnnotation = null;
+				if (field != null) {
+					fieldAnnotation = field.getAnnotation(JSONField.class);
+					
+					if (fieldAnnotation != null) {
+						if (!fieldAnnotation.serialize()) { // 这个方法的意思,就是不进行序列化
+							continue ;
+						}
+						
+						ordinal = fieldAnnotation.ordinal();
+						serializeFeatures = SerializerFeature.of(fieldAnnotation.serialzeFeatures());
+						parserFeatures = Feature.of(fieldAnnotation.parseFeatures());
+						
+						if (fieldAnnotation.name().length() != 0) {
+							propertyName = fieldAnnotation.name();
+							
+							if (aliasMap != null) {
+								propertyName = aliasMap.get(propertyName);
+								if (propertyName == null) {
+									continue ;
+								}
+							}
+						}
+						
+						if (fieldAnnotation.label().length() != 0) {
+							label = fieldAnnotation.label();
+						}
+					}
+				}
+				
+				if (aliasMap != null) {
+					propertyName = aliasMap.get(propertyName);
+					if (propertyName == null) {
+						continue ;
+					}
+				}
+				
+				if (propertyNamingStrategy != null) {
+					propertyName = propertyNamingStrategy.translate(propertyName);
+				}
+				
+				FieldInfo fieldInfo = new FieldInfo(propertyName, method, field, clazz, null, ordinal, serializeFeatures, parserFeatures, annotation, fieldAnnotation, label);
+				fieldInfoMap.put(propertyName, fieldInfo);
+			}
+			/**------------------------------检测method的名称 end---------------------------------*/
+			
+			// 下面判断的是boolean值
+			if (methodName.startsWith("is")) {
+				if (methodName.length() < 3) {
+					continue ;
+				}
+				
+				if (method.getReturnType() != Boolean.TYPE && method.getReturnType() != Boolean.class) {
+					continue ;
+				}
+				
+				char c2 = methodName.charAt(2);
+				
+				String propertyName;
+				if (Character.isUpperCase(c2)) {
+					if (compatibleWithJavaBean) {
+						propertyName = decapitalize(methodName.substring(2));
+					} else {
+						propertyName = Character.toLowerCase(methodName.charAt(2)) + methodName.substring(3);
+					}
+					propertyName = getPropertyNameByCompatibleFieldName(fieldCacheMap, methodName, propertyName, 2);
+				} else if (c2 == '_') {
+					propertyName = methodName.substring(3);
+				} else if (c2 == 'f') {
+					propertyName = methodName.substring(2);
+				} else {
+					continue ;
+				}
+				
+				Field field = ParserConfig.getFieldFromCache(propertyName, fieldCacheMap);
+				
+				if (field == null) {
+					field = ParserConfig.getFieldFromCache(methodName, fieldCacheMap);
+				}
+				
+				JSONField fieldAnnotation = null;
+				if (field != null) {
+					fieldAnnotation = field.getAnnotation(JSONField.class);
+					
+					if (fieldAnnotation != null) {
+						if (!fieldAnnotation.serialize()) {
+							continue ;
+						}
+						
+						ordinal = fieldAnnotation.ordinal();
+						serializeFeatures = SerializerFeature.of(fieldAnnotation.serialzeFeatures());
+						parserFeatures = Feature.of(fieldAnnotation.parseFeatures());
+						
+						if (fieldAnnotation.name().length() != 0) {
+							propertyName = fieldAnnotation.name();
+							
+							if (aliasMap != null) {
+								propertyName = aliasMap.get(propertyName);
+								if (propertyName == null) {
+									continue ;
+								}
+							}
+							
+							if (propertyNamingStrategy != null) {
+								propertyName = propertyNamingStrategy.translate(propertyName);
+							}
+							
+							// 优先选择get
+							if (fieldInfoMap.containsKey(propertyName)) {
+								continue ;
+							}
+							
+							FieldInfo fieldInfo = new FieldInfo(propertyName, method, field, clazz, null, ordinal, serializeFeatures, parserFeatures, annotation, fieldAnnotation, label);
+							fieldInfoMap.put(propertyName, fieldInfo);
+						}
+					}
+					
+					Field[] fields = clazz.getFields();
+					computeFields(clazz, aliasMap, propertyNamingStrategy, fieldInfoMap, fields);
+					
+					return getFieldInfos(clazz, sorted, fieldInfoMap);
+				}
+			}
+			
+		}
+		
+		return null;
+	}
+
+	/**
+	 * 
+	 * <p>Title: decapitalize</p>
+	 * <p>Description: 将第一个字母进行小写</p>
+	 * @param name 字段名称
+	 * @return
+	 * @author java_liudong@163.com  2017年6月6日 下午6:40:34
+	 */
+	public static String decapitalize(String name) {
+		if (name == null || name.length() == 0) {
+			return name;
+		}
+		
+		if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) && Character.isUpperCase(0)) { // 第一个和第二个字符都是大写
+			return name;
+		}
+		
+		char[] chars = name.toCharArray();
+		chars[0] = Character.toLowerCase(chars[0]);
+		return new String(chars);
+	}
+	
 }
