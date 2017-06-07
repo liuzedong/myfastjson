@@ -730,7 +730,31 @@ public class TypeUtils {
 		computeFields(clazz, aliasMap, propertyNamingStrategy, fieldInfoMap, fields);
 		return getFieldInfos(clazz, sorted, fieldInfoMap);
 	}
-
+	
+	/**
+	 * 
+	 * <p>Title: computeGettersWithFieldBase</p>
+	 * <p>Description: 获取对象的字段和父类中的对象</p>
+	 * @param clazz
+	 * @param aliasMap
+	 * @param sorted
+	 * @param propertyNamingStrategy
+	 * @return
+	 * @author java_liudong@163.com  2017年6月7日 上午10:35:08
+	 */
+	public static List<FieldInfo> computeGettersWithFieldBase(Class<?> clazz, Map<String, String> aliasMap, boolean sorted, PropertyNamingStrategy propertyNamingStrategy) {
+		Map<String, FieldInfo> fieldInfoMap = new LinkedHashMap<String, FieldInfo>();
+		
+		// 检测, 当前对象和父对象是否为空, 进行循环迭代
+		for (Class<?> currentClass = clazz; currentClass != null; currentClass = currentClass.getSuperclass()) {
+			Field[] fields = currentClass.getDeclaredFields(); // 获取所有的Field
+			
+			computeFields(currentClass, aliasMap, propertyNamingStrategy, fieldInfoMap, fields);
+		}
+		
+		return getFieldInfos(clazz, sorted, fieldInfoMap);
+	}
+	
 	/**
 	 * 
 	 * <p>Title: decapitalize</p>
