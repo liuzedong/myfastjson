@@ -10,7 +10,9 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import com.dongdongxia.myfastjson.annotation.JSONField;
 import com.dongdongxia.myfastjson.annotation.JSONType;
 import com.dongdongxia.myfastjson.parser.Feature;
 import com.dongdongxia.myfastjson.parser.ParserConfig;
+import com.dongdongxia.myfastjson.serializer.SerializeBeanInfo;
 import com.dongdongxia.myfastjson.serializer.SerializerFeature;
 
 /**
@@ -775,6 +778,66 @@ public class TypeUtils {
 		char[] chars = name.toCharArray();
 		chars[0] = Character.toLowerCase(chars[0]);
 		return new String(chars);
+	}
+	
+	/**
+	 * 
+	 * <p>Title: buildBeanInfo</p>
+	 * <p>Description: 将对象中的字段封装到序列化对象中</p>
+	 * @param beanType 序列化对象
+	 * @param aliasMap 别名缓存
+	 * @param propertyNamingStrategy 命名枚举
+	 * @param fieldBased 是否使用基础字段, 默认为false
+	 * @return
+	 * @author java_liudong@163.com  2017年6月7日 下午5:53:50
+	 */
+	public static SerializeBeanInfo buildBeanInfo(Class<?> beanType, Map<String, String> aliasMap, PropertyNamingStrategy propertyNamingStrategy, boolean fieldBased) {
+		JSONType jsonType = beanType.getAnnotation(JSONType.class);
+		
+		// 生成fieldName,field的快照,避免后面的轮循
+		Map<String, Field> fieldCacheMap = new HashMap<String, Field>();
+		ParserConfig.parserAllFieldToCache(beanType, fieldCacheMap);
+		
+		List<FieldInfo> fieldInfoList = fieldBased ? 
+				computeGettersWithFieldBase(beanType, aliasMap, false, propertyNamingStrategy) :
+					computeGetters(beanType, jsonType, aliasMap, fieldCacheMap, false, propertyNamingStrategy);
+		
+		FieldInfo[] fields = new FieldInfo[fieldInfoList.size()];
+		fieldInfoList.toArray(fields);
+		
+		String[] orders = null;
+		
+		final int features;
+		String typeName = null;
+		if (jsonType != null) {
+			orders = jsonType.orders();
+			typeName = jsonType.typeName();
+			if (typeName.length() == 0) {
+				typeName = null;
+			}
+			features = SerializerFeature.of(jsonType.serializeFeatures());
+		} else {
+			features = 0;
+		}
+		
+		FieldInfo[] sortedFields;
+		List<FieldInfo> sortedFieldList;
+		if (orders != null && orders.length != 0) {
+			sortedFieldList = fieldBased 
+					? computeGettersWithFieldBase(beanType, aliasMap, true, propertyNamingStrategy)
+					: computeGetters(beanType, jsonType, aliasMap, fieldCacheMap, true, propertyNamingStrategy);
+		} else {
+			sortedFieldList = new ArrayList<FieldInfo>(fieldInfoList);
+			Collections.sort(sortedFieldList);
+		}
+		sortedFields = new FieldInfo[sortedFieldList.size()];
+		sortedFieldList.toArray(sortedFields);
+		
+		if (Arrays.equals(sortedFields, fields)) {
+			sortedFields = fields;
+		}
+		
+		return new SerializeBeanInfo(beanType, jsonType, typeName, features, fields, sortedFields);
 	}
 	
 }
