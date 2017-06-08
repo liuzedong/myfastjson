@@ -24,6 +24,10 @@ public abstract class JSON implements JSONStreamAware, JSONAware{
 	 * 默认系统语言环境
 	 */
 	public static Locale defaultLocale = Locale.getDefault();
+	/**
+	 * 默认编译后对象内存中标识
+	 */
+	public static String DEFAULT_TYPE_KEY = "@type";
 
 	// 初始化, 默认解析特性
 	public static int DEFAULT_PARSER_FEATURE;
