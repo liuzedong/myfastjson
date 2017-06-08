@@ -417,4 +417,14 @@ public class JSONSerializer extends SerializerFilterable{
 		
 	}
 	
+	/**
+	 * 
+	 * <p>Title: write</p>
+	 * <p>Description: 向流对象中输入文本</p>
+	 * @param text
+	 * @author java_liudong@163.com  2017年6月8日 上午10:45:25
+	 */
+	public final void write(String text) {
+		StringCodec.instance.write(this, text);
+	}
 }
