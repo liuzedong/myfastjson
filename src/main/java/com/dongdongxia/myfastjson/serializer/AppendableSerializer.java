@@ -10,6 +10,8 @@ import java.lang.reflect.Type;
  * @author java_liudong@163.com  2017年6月9日 下午2:24:11
  */
 public class AppendableSerializer implements ObjectSerializer{
+	
+	public static final AppendableSerializer instance = new AppendableSerializer();
 
 	@Override
 	public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features) throws IOException {
