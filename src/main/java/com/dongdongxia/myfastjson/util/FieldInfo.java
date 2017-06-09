@@ -421,4 +421,19 @@ public class FieldInfo implements Comparable<FieldInfo>{
 		return 0;
 	}
 
+	/**
+	 * 
+	 * <p>Title: setAccessible</p>
+	 * <p>Description: 将方法中的字段, 设置为可访问的状态</p>
+	 * @throws SecurityException
+	 * @author java_liudong@163.com  2017年6月9日 下午4:01:15
+	 */
+	public void setAccessible() throws SecurityException{
+		if (method != null) {
+			TypeUtils.setAccessible(method);
+			return ;
+		}
+		
+		TypeUtils.setAccessible(field);
+	}
 }
