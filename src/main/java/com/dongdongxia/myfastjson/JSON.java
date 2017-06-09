@@ -1,9 +1,12 @@
 package com.dongdongxia.myfastjson;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.TimeZone;
 
 import com.dongdongxia.myfastjson.parser.Feature;
+import com.dongdongxia.myfastjson.serializer.JSONSerializer;
+import com.dongdongxia.myfastjson.serializer.SerializeWriter;
 import com.dongdongxia.myfastjson.serializer.SerializerFeature;
 import com.dongdongxia.myfastjson.util.IOUtils;
 
@@ -81,8 +84,16 @@ public abstract class JSON implements JSONStreamAware, JSONAware{
 	}
 	
 	@Override
-	public void writeJSONString(Appendable out) {
-		
+	public void writeJSONString(Appendable appendable) {
+		SerializeWriter out = new SerializeWriter();
+		try {
+			new JSONSerializer(out).write(this);
+			appendable.append(out.toString());
+		} catch (IOException e) {
+			throw new JSONException(e.getMessage(), e);
+		} finally {
+			out.close();
+		}
 	}
 	
 }
