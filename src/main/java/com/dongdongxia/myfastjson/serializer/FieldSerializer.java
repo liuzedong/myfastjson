@@ -170,7 +170,7 @@ public class FieldSerializer implements Comparable<FieldSerializer>{
 	
 	@Override
 	public int compareTo(FieldSerializer o) {
-		return 0;
+		return this.fieldInfo.compareTo(o.fieldInfo);
 	}
 
 	/**
