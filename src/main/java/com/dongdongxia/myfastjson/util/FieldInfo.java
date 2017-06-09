@@ -5,6 +5,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -435,5 +436,23 @@ public class FieldInfo implements Comparable<FieldInfo>{
 		}
 		
 		TypeUtils.setAccessible(field);
+	}
+	
+	/**
+	 * 
+	 * <p>Title: get</p>
+	 * <p>Description: 实例化方法或者.获取字段上的对象</p>
+	 * @param javaObject
+	 * @return
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 * @author java_liudong@163.com  2017年6月9日 下午4:28:57
+	 */
+	public Object get(Object javaObject) throws IllegalAccessException, InvocationTargetException {
+		if (method != null) {
+			Object value = method.invoke(javaObject);
+			return value;
+		}
+		return field.get(javaObject);
 	}
 }
