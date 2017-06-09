@@ -2,7 +2,10 @@ package com.dongdongxia.myfastjson.serializer;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import com.dongdongxia.myfastjson.JSON;
 import com.dongdongxia.myfastjson.annotation.JSONField;
 import com.dongdongxia.myfastjson.util.FieldInfo;
 
@@ -141,6 +144,28 @@ public class FieldSerializer implements Comparable<FieldSerializer>{
 	 */
 	public Object getPropertyValueDirect(Object object) throws InvocationTargetException, IllegalAccessException{
 		return fieldInfo.get(object);
+	}
+	
+	/**
+	 * 
+	 * <p>Title: getPropertyValue</p>
+	 * <p>Description: 获取对象上面的值</p>
+	 * @param object
+	 * @return
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 * @author java_liudong@163.com  2017年6月9日 下午4:41:00
+	 */
+	public Object getPropertyValue(Object object) throws InvocationTargetException, IllegalAccessException {
+		Object propertyValue = fieldInfo.get(object);
+		if (format != null && propertyValue != null) {
+			if (fieldInfo.fieldClass == Date.class) {
+				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
+				dateFormat.setTimeZone(JSON.defaultTimeZone);
+				return dateFormat.format(propertyValue);
+			}
+		}
+		return propertyValue;
 	}
 	
 	@Override
