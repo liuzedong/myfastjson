@@ -1,6 +1,7 @@
 package com.dongdongxia.myfastjson.serializer;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import com.dongdongxia.myfastjson.annotation.JSONField;
 import com.dongdongxia.myfastjson.util.FieldInfo;
@@ -128,7 +129,19 @@ public class FieldSerializer implements Comparable<FieldSerializer>{
 		}
 	}
 	
-	
+	/**
+	 * 
+	 * <p>Title: getPropertyValueDirect</p>
+	 * <p>Description: 获取字段上面的对象</p>
+	 * @param object
+	 * @return
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 * @author java_liudong@163.com  2017年6月9日 下午4:30:51
+	 */
+	public Object getPropertyValueDirect(Object object) throws InvocationTargetException, IllegalAccessException{
+		return fieldInfo.get(object);
+	}
 	
 	@Override
 	public int compareTo(FieldSerializer o) {
