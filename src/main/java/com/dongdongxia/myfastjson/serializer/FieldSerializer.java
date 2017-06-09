@@ -1,5 +1,7 @@
 package com.dongdongxia.myfastjson.serializer;
 
+import java.io.IOException;
+
 import com.dongdongxia.myfastjson.annotation.JSONField;
 import com.dongdongxia.myfastjson.util.FieldInfo;
 
@@ -97,6 +99,35 @@ public class FieldSerializer implements Comparable<FieldSerializer>{
 		}
 		this.writeNull = writeNull;
 	}
+	
+	/**
+	 * 
+	 * <p>Title: writePrefix</p>
+	 * <p>Description: 写入前缀</p>
+	 * @param serializer
+	 * @throws IOException
+	 * @author java_liudong@163.com  2017年6月9日 下午4:20:10
+	 */
+	public void writePrefix(JSONSerializer serializer) throws IOException {
+		SerializeWriter out = serializer.out;
+		
+		if (out.quoteFieldNames) {
+			if (out.useSingleQuotes) {
+				if (single_quoted_fieldPrefix == null) {
+					single_quoted_fieldPrefix = '\'' + fieldInfo.name + "\':"; // 使用单引号 'name':
+				}
+				out.write(single_quoted_fieldPrefix);
+			} else {
+				out.write(double_quote_fieldPrefix);
+			}
+		} else {
+			if (un_quoted_fieldPrefix == null) {
+				this.un_quoted_fieldPrefix = fieldInfo.name + ":"; // 没有引号的情况, name:
+			}
+			out.write(un_quoted_fieldPrefix);
+		}
+	}
+	
 	
 	
 	@Override
