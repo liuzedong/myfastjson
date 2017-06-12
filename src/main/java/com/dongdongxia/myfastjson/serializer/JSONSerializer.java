@@ -437,6 +437,6 @@ public class JSONSerializer extends SerializerFilterable{
 	 * @author java_liudong@163.com  2017年6月12日 上午11:01:18
 	 */
 	public ObjectSerializer getObjectWriter(Class<?> clazz) {
-		config.getObjectWriter(clazz);
+		return config.getObjectWriter(clazz);
 	}
 }
