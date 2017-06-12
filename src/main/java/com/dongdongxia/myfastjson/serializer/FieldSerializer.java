@@ -3,6 +3,7 @@ package com.dongdongxia.myfastjson.serializer;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 
 import com.dongdongxia.myfastjson.JSON;
@@ -171,6 +172,120 @@ public class FieldSerializer implements Comparable<FieldSerializer>{
 	@Override
 	public int compareTo(FieldSerializer o) {
 		return this.fieldInfo.compareTo(o.fieldInfo);
+	}
+	
+	/**
+	 * 
+	 * <p>Title: writeValue</p>
+	 * <p>Description: 将字段写入到流中</p>
+	 * @param serializer 写入的流
+	 * @param propertyValue 字段值
+	 * @throws Exception
+	 * @author java_liudong@163.com  2017年6月12日 上午9:48:42
+	 */
+	public void writeValue(JSONSerializer serializer, Object propertyValue) throws Exception {
+		if (runtimeInfo == null) {
+			
+			Class<?> runtimeFieldClass;
+			if (propertyValue == null) {
+				runtimeFieldClass = this.fieldInfo.fieldClass; // 字段的对象
+			} else {
+				runtimeFieldClass = propertyValue.getClass(); 
+			}
+			
+			ObjectSerializer fieldSerializer = null;
+			JSONField fieldAnnotation = fieldInfo.getAnnotation();
+			
+			if (fieldAnnotation != null && fieldAnnotation.serializeUsing() != Void.class) {
+				fieldSerializer = (ObjectSerializer) fieldAnnotation.serializeUsing().newInstance();
+				serializeUsing = true;
+			} else {
+				if (format != null) { // 双进度, 数字格式化
+					if (runtimeFieldClass == double.class || runtimeFieldClass == Double.class) {
+						fieldSerializer = new DoubleSerializer(format);
+					} else if (runtimeFieldClass == float.class || runtimeFieldClass == Float.class) {
+						fieldSerializer = new FloatCodec(format);
+					}
+				}
+				if (fieldSerializer == null) {
+					fieldSerializer = serializer.getObjectWriter(runtimeFieldClass); // 获取字段序列化的实现对象
+				}
+			}
+			
+			runtimeInfo = new RuntimeSerializerInfo(fieldSerializer, runtimeFieldClass); // 参数一: 字段序列化实现类, 参数二: 需要序列化的对象
+		}
+		
+		// 下面是 runtimeSerializer不为空的情况
+		final RuntimeSerializerInfo runtimeInfo = this.runtimeInfo;
+		
+		final int fieldFeatures = fieldInfo.serializeFeatures; // 序列化功能
+		
+		if (propertyValue == null) { // 当字段的值为null(空) 的情况, 根据不同的类型,输出不同的空值
+			Class<?> runtimeFieldClass = runtimeInfo.runtimeFieldClass;
+			SerializeWriter out = serializer.out;
+			if (Number.class.isAssignableFrom(runtimeFieldClass)) { // 检测需要序列化对象-> 是否是 Number的子类或者当前类
+				out.writeNull(features, SerializerFeature.WriteNullNumberAsZero.mask);
+				return ;
+			} else if (String.class == runtimeFieldClass) {
+				out.writeNull(features,SerializerFeature.WriteNullStringAsEmpty.mask);
+				return ;
+			} else if (Boolean.class == runtimeFieldClass) {
+				out.writeNull(features, SerializerFeature.WriteNullBooleanAsFalse.mask);
+				return ;
+			} else if (Collection.class.isAssignableFrom(runtimeFieldClass)) { // 集合
+				out.writeNull(features, SerializerFeature.WriteNullListAsEmpty.mask);
+				return ;
+			}
+			
+			ObjectSerializer fieldSerializer = runtimeInfo.fieldSerializer; // 序列化实现对象
+			
+			if (out.isEnable(SerializerFeature.WRITE_MAP_NULL_FEATURES) && fieldSerializer instanceof JavaBeanSerializer) {
+				out.writeNull();
+				return ;
+			}
+			
+			fieldSerializer.write(serializer, null, fieldInfo.name, fieldInfo.fieldType, fieldFeatures);
+			return ;
+		}
+		
+		// 下面是 字段的值不为空的情况
+		if (fieldInfo.isEnum) {
+			if (writeEnumUsingName) {
+				serializer.out.writeString(((Enum<?>) propertyValue).name()); // 写入枚举的name
+				return ;
+			}
+			
+			if (writeEnumUsingToString) {
+				serializer.out.writeString(((Enum<?>) propertyValue).toString());
+				return ;
+			}
+		}
+		
+		
+		Class<?> valueClass = propertyValue.getClass();
+		ObjectSerializer valueSerializer;
+		if (valueClass == runtimeInfo.runtimeFieldClass || serializeUsing) {
+			valueSerializer = runtimeInfo.fieldSerializer;
+		} else {
+			valueSerializer = serializer.getObjectWriter(valueClass);
+		}
+		
+		if (format != null && !(valueSerializer instanceof DoubleSerializer || valueSerializer instanceof FloatCodec)) { // 
+			if (valueSerializer instanceof ContextObjectSerializer) {
+				((ContextObjectSerializer) valueSerializer).write(serializer, propertyValue, this.fieldContext);
+			} else {
+				serializer.writeWithFormat(propertyValue, format);
+			}
+			return ;
+		}
+		
+		if (fieldInfo.unwrapped && valueSerializer instanceof JavaBeanSerializer) {
+			JavaBeanSerializer javaBeanSerializer = (JavaBeanSerializer) valueSerializer;
+			javaBeanSerializer.write(serializer, propertyValue, fieldInfo.name, fieldInfo.fieldType, fieldFeatures, true);
+			return ;
+		}
+		
+		valueSerializer.write(serializer, propertyValue, fieldInfo.name, fieldInfo.fieldType, fieldFeatures);
 	}
 
 	/**
