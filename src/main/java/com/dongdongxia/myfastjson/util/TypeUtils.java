@@ -783,6 +783,20 @@ public class TypeUtils {
 	/**
 	 * 
 	 * <p>Title: buildBeanInfo</p>
+	 * <p>Description: 重载创建SerializerBeanInfo的方法</p>
+	 * @param beanType
+	 * @param aliasMap
+	 * @param propertyNamingStrategy
+	 * @return
+	 * @author java_liudong@163.com  2017年6月12日 下午2:18:41
+	 */
+	public static SerializeBeanInfo buildBeanInfo(Class<?> beanType, Map<String, String> aliasMap, PropertyNamingStrategy propertyNamingStrategy) {
+		return buildBeanInfo(beanType, aliasMap, propertyNamingStrategy, false);
+	}
+	
+	/**
+	 * 
+	 * <p>Title: buildBeanInfo</p>
 	 * <p>Description: 将对象中的字段封装到序列化对象中</p>
 	 * @param beanType 序列化对象
 	 * @param aliasMap 别名缓存
