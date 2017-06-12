@@ -56,4 +56,29 @@ public class SerializeConfig {
 	public static SerializeConfig getGlobalConfig() {
 		return globalInstance;
 	}
+	
+	/**
+	 * 
+	 * <p>Title: getObjectWriter</p>
+	 * <p>Description: 获取指定对象的序列化实现对象</p>
+	 * @param clazz
+	 * @return
+	 * @author java_liudong@163.com  2017年6月12日 上午10:28:46
+	 */
+	public ObjectSerializer getObjectWriter(Class<?> clazz) {
+		return getObjectWriter(clazz, true);
+	}
+	
+	/**
+	 * 
+	 * <p>Title: getObjectWriter</p>
+	 * <p>Description: 获取指定对象的序列化实现对象, 没有就使用字节码创建</p>
+	 * @param clazz 序列化对象
+	 * @param create 是否创建
+	 * @return
+	 * @author java_liudong@163.com  2017年6月12日 上午10:30:08
+	 */
+	private ObjectSerializer getObjectWriter(Class<?> clazz, boolean create) {
+		return null;
+	}
 }
