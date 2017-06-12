@@ -3,6 +3,7 @@ package com.dongdongxia.myfastjson.serializer;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.IdentityHashMap;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -415,6 +416,28 @@ public class JSONSerializer extends SerializerFilterable{
 	
 	protected final void writeKeyValue(char seperator, String key, Object value){
 		
+	}
+	
+	/**
+	 * 
+	 * <p>Title: writeWithFormat</p>
+	 * <p>Description: 将序列化对象,进行日期格式化</p>
+	 * @param object
+	 * @param format
+	 * @author java_liudong@163.com  2017年6月12日 上午11:47:36
+	 */
+	public final void writeWithFormat(Object object, String format) {
+		if (object instanceof Date) {
+			DateFormat dateFormat = this.getDateFormat();
+			if (dateFormat == null) {
+				dateFormat = new SimpleDateFormat(format, locale);
+				dateFormat.setTimeZone(timeZone);
+			}
+			String text = dateFormat.format((Date)object);
+			out.writeString(text);
+			return ;
+		}
+		write(object);
 	}
 	
 	/**
