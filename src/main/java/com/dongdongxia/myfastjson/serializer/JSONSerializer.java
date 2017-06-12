@@ -427,4 +427,16 @@ public class JSONSerializer extends SerializerFilterable{
 	public final void write(String text) {
 		StringCodec.instance.write(this, text);
 	}
+	
+	/**
+	 * 
+	 * <p>Title: getObjectWriter</p>
+	 * <p>Description: 获取指定对象的序列化实现对象</p>
+	 * @param clazz 指定序列化对象
+	 * @return
+	 * @author java_liudong@163.com  2017年6月12日 上午11:01:18
+	 */
+	public ObjectSerializer getObjectWriter(Class<?> clazz) {
+		config.getObjectWriter(clazz);
+	}
 }
