@@ -1,4 +1,7 @@
 package com.dongdongxia.myfastjson.serializer;
+
+import com.dongdongxia.myfastjson.JSON;
+
 /**
  * 
  * <P>Description: 序列化配置对象</P>
@@ -9,6 +12,9 @@ public class SerializeConfig {
 
 	// 使用单例获取全局的配置
 	public static final SerializeConfig globalInstance = new SerializeConfig();
+	
+	// 默认的type类型
+	protected String typeKey = JSON.DEFAULT_TYPE_KEY;
 	
 	
 	public SerializeConfig() {
