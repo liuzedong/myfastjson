@@ -154,6 +154,20 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 			return ;
 		}
 		
+		if (writeReference(serializer, object, features)) {
+			return ;
+		}
+		
+		final FieldSerializer[] getters;
+		
+		if (out.sortField) {
+			getters = this.sortedGetters;
+		} else {
+			getters = this.getters;
+		}
+		
+		SerialContext parent = serializer.context;
+		serializer.setContext(parent, object, fieldName, this.beanInfo.features, features);
 		
 	}
 
@@ -180,6 +194,23 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 		} else {
 			return false;
 		}
+	}
+	
+	/**
+	 * 
+	 * <p>Title: isWriteAsArray</p>
+	 * <p>Description: 检测写入数组,是否使用[]</p>
+	 * @param serializer
+	 * @return
+	 * @author java_liudong@163.com  2017年6月14日 下午2:11:16
+	 */
+	protected boolean isWriteAsArray(JSONSerializer serializer) {
+		return isWriteAsArray(serializer, 0);
+	}
+	
+	protected boolean isWriteAsArray(JSONSerializer serializer, int fieldFeatures) {
+		final int mask = SerializerFeature.BeanToArray.mask;
+		return (beanInfo.features & mask) != 0 || serializer.out.beanToArray || (fieldFeatures & mask) != 0;
 	}
 
 }
