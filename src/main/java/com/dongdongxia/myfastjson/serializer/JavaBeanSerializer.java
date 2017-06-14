@@ -147,7 +147,39 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 	}
 	
 	protected void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features, boolean unwrapped) {
+		SerializeWriter out = serializer.out;
 		
+		if (object == null) {
+			out.writeNull();
+			return ;
+		}
+		
+		
+	}
+
+	/**
+	 * 
+	 * <p>Title: writeReference</p>
+	 * <p>Description: 写入引用的方法</p>
+	 * @param serializer
+	 * @param object
+	 * @param fieldFeatures
+	 * @return
+	 * @author java_liudong@163.com  2017年6月14日 上午9:38:42
+	 */
+	public boolean writeReference(JSONSerializer serializer, Object object, int fieldFeatures) {
+		SerialContext context = serializer.context;
+		int mask = SerializerFeature.DisableCircularReferenceDetect.mask;
+		if (context == null || (context.features & mask) != 0 || (fieldFeatures & mask) != 0) {
+			return false;
+		}
+		
+		if (serializer.references != null && serializer.references.containsKey(object)) {
+			serializer.writeReference(object);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }
