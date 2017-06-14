@@ -143,7 +143,7 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 	
 	@Override
 	public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features) throws IOException {
-		
+		write(serializer, object, fieldName, fieldType, features, false);
 	}
 	
 	protected void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features, boolean unwrapped) {
