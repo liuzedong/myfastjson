@@ -65,6 +65,21 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 		}
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeDirectNonContext</p>
+	 * <p>Description: 直接将对象中的某个字段写入到缓存中</p>
+	 * @param serializer
+	 * @param object
+	 * @param fieldName
+	 * @param fieldType
+	 * @param features
+	 * @throws IOException
+	 * @author java_liudong@163.com  2017年6月14日 上午9:21:28
+	 */
+	public void writeDirectNonContext(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features) throws IOException {
+		write(serializer, object, fieldName, fieldType, features);
+	}
 	
 	public FieldSerializer getFieldSerializer(String key) {
 		if (key == null) {
