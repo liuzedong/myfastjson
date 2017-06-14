@@ -97,7 +97,21 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 		write(serializer, object, fieldName, fieldType, features);
 	}
 	
-	
+	/**
+	 * 
+	 * <p>Title: writeAsArrayNonContext</p>
+	 * <p>Description: 将对象中的数组字段直接写入到缓存流中</p>
+	 * @param serializer
+	 * @param object
+	 * @param fieldName
+	 * @param fieldType
+	 * @param features
+	 * @throws IOException
+	 * @author java_liudong@163.com  2017年6月14日 上午9:28:41
+	 */
+	public void writeAsArrayNonContext(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features) throws IOException {
+		write(serializer, object, fieldName, fieldType, features);
+	}
 	
 	public FieldSerializer getFieldSerializer(String key) {
 		if (key == null) {
