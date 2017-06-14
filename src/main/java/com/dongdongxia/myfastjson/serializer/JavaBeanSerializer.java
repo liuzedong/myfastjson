@@ -81,6 +81,24 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 		write(serializer, object, fieldName, fieldType, features);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: writeAsArray</p>
+	 * <p>Description: 写入的字段是数组类型的</p>
+	 * @param serializer
+	 * @param object
+	 * @param fieldName
+	 * @param fieldType
+	 * @param features
+	 * @throws IOException
+	 * @author java_liudong@163.com  2017年6月14日 上午9:24:59
+	 */
+	public void writeAsArray(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features) throws IOException{
+		write(serializer, object, fieldName, fieldType, features);
+	}
+	
+	
+	
 	public FieldSerializer getFieldSerializer(String key) {
 		if (key == null) {
 			return null;
