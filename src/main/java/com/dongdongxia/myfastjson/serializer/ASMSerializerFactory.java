@@ -38,5 +38,18 @@ public class ASMSerializerFactory implements Opcodes{
 	static final String SerialContext_desc = desc(SerialContext.class); // Lcom/dongdongxia/myfastjson/serializer/SerialContext;
 	static final String SerializeFilterable_desc = desc(SerializerFilterable.class); // Lcom/dongdongxia/myfastjson/serializer/SerializerFilterable;
 	
-	
+	static class Context {
+		
+		/**
+		 * 
+		 * <p>Title: createJavaBeanSerializer</p>
+		 * <p>Description: 使用字节码, 创建JavaBean序列化器</p>
+		 * @param beanInfo
+		 * @return
+		 * @author java_liudong@163.com  2017年6月15日 上午11:54:08
+		 */
+		public JavaBeanSerializer createJavaBeanSerializer(SerializeBeanInfo beanInfo) {
+			return null;
+		}
+	}
 }
