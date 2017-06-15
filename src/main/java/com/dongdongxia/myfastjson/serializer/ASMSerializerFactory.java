@@ -38,4 +38,5 @@ public class ASMSerializerFactory implements Opcodes{
 	static final String SerialContext_desc = desc(SerialContext.class); // Lcom/dongdongxia/myfastjson/serializer/SerialContext;
 	static final String SerializeFilterable_desc = desc(SerializerFilterable.class); // Lcom/dongdongxia/myfastjson/serializer/SerializerFilterable;
 	
+	protected boolean writeDirect = true;
 }
