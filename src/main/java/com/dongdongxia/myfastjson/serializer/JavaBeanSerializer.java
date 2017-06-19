@@ -169,8 +169,58 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 		SerialContext parent = serializer.context;
 		serializer.setContext(parent, object, fieldName, this.beanInfo.features, features);
 		
+		final boolean writeAsArray = isWriteAsArray(serializer, features);
+		
+		try {
+			/** JSONzui*/
+			final char startSeperator = writeAsArray ? '[' : '{';
+			final char endSeperator = writeAsArray ? ']' : '}';
+			
+			if (!unwrapped) { // 是否使用 {} 或者 [] 进行包装, 数据, 默认是false, 这里使用取反, 所以是使用的
+				out.append(startSeperator);
+			}
+			
+			if (getters.length > 0 && out.isEnable(SerializerFeature.PrettyFormat)) { // 如果有字段, 且需要格式化, 就进行格式化
+				serializer.incrementIndent();
+				serializer.println();
+			}
+			
+			boolean commaFlag = false;
+			
+			if ((this.beanInfo.features & SerializerFeature.WriteClassName.mask) != 0 || serializer.isWriteClassName(fieldType, object)) {
+				Class<?> objClass = object.getClass();
+				if (objClass != fieldType) {
+					writeClassName(serializer, object);
+				}
+			}
+		} catch (Exception e) {
+			// 此处没有完成
+		}
 	}
 
+	/**
+	 * 
+	 * <p>Title: writeClassName</p>
+	 * <p>Description: 写入对象的名称, 类似 "@type":"java.lang.Object"</p>
+	 * @param serializer
+	 * @param object
+	 * @author java_liudong@163.com  2017年6月19日 下午4:14:09
+	 */
+	public void writeClassName(JSONSerializer serializer, Object object) {
+		serializer.out.writeFieldName(serializer.config.typeKey, false);
+		String typeName = this.beanInfo.typeName;
+		if (typeName == null) {
+			Class<?> clazz = object.getClass();
+			
+			if (TypeUtils.isProxy(clazz)) {
+				clazz = clazz.getSuperclass();
+			}
+			
+			typeName = clazz.getName();
+		}
+		serializer.write(typeName);
+	}
+	
 	/**
 	 * 
 	 * <p>Title: writeReference</p>
@@ -208,6 +258,15 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 		return isWriteAsArray(serializer, 0);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: isWriteAsArray</p>
+	 * <p>Description: 是否写成数组, 默认为false</p>
+	 * @param serializer
+	 * @param fieldFeatures
+	 * @return
+	 * @author java_liudong@163.com  2017年6月19日 下午2:09:16
+	 */
 	protected boolean isWriteAsArray(JSONSerializer serializer, int fieldFeatures) {
 		final int mask = SerializerFeature.BeanToArray.mask;
 		return (beanInfo.features & mask) != 0 || serializer.out.beanToArray || (fieldFeatures & mask) != 0;
