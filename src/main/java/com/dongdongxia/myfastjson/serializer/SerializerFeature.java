@@ -109,7 +109,7 @@ public enum SerializerFeature {
 	/**
 	 * 
 	 */
-	IgnoreNonFieldGetter,
+	IgnoreNonFieldGetter, // 没有Field对象的时候, 就不进行字段的序列化, 默认为false
 	/**
 	 * 
 	 */
@@ -117,7 +117,7 @@ public enum SerializerFeature {
 	/**
 	 * 
 	 */
-	IgnoreErrorGetter,
+	IgnoreErrorGetter, // 如果获取对象上字段的值,比如name的值刘东, 出现异常时, 值就设置为null, 而不是抛出异常, 默认为false, 抛出异常
 	/**
 	 * 
 	 */
