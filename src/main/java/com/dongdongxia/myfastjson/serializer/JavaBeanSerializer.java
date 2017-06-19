@@ -2,10 +2,12 @@ package com.dongdongxia.myfastjson.serializer;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.dongdongxia.myfastjson.annotation.JSONField;
 import com.dongdongxia.myfastjson.util.FieldInfo;
 import com.dongdongxia.myfastjson.util.TypeUtils;
 /**
@@ -229,18 +231,151 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 					}
 				}
 				
-				if (this.applyName(serializer, object, fieldInfo.name)) {
-					
+				if (this.applyName(serializer, object, fieldInfo.name) || !this.applyLabel(serializer, fieldInfo.label)) {
+					continue ;
 				}
+				
+				Object propertyValue; // 定义的字段的值
+				try {
+					propertyValue = fieldSerializer.getPropertyValueDirect(object);
+				} catch (InvocationTargetException ex) {
+					if (out.isEnable(SerializerFeature.IgnoreErrorGetter)) {
+						propertyValue = null;
+					} else {
+						throw ex;
+					}
+				}
+				
+				if (!this.apply(serializer, object, fieldInfoName, propertyValue)) { // 过滤字段值
+					continue ;
+				}
+				
+				String key = fieldInfoName;
+				key = this.processKey(serializer, object, key, propertyValue); // 过滤key 的值
+				
+				Object originaValue = propertyValue; // 原始的值, 不是通过上面处理的key值
+				propertyValue = this.processValue(serializer, fieldSerializer.fieldContext, object, fieldInfoName, propertyValue); // 过滤value的值
+				
+				if (propertyValue == null && !writeAsArray) { // 值为空, 并且可以写入数组类型的行卡下
+					if ((!fieldSerializer.writeNull) && (!out.isEnable(SerializerFeature.WRITE_MAP_NULL_FEATURES))) {
+						continue ;
+					}
+				}
+				
+				if (propertyValue != null 
+						&& (out.notWriteDefaultValue 
+						|| (fieldInfo.serializeFeatures & SerializerFeature.NotWriteDefaultValue.mask) != 0 
+						|| (beanInfo.features & SerializerFeature.NotWriteDefaultValue.mask) != 0)) {
+					Class<?> fieldCLass = fieldInfo.fieldClass;
+					if (fieldCLass == byte.class && propertyValue instanceof Byte && ((Byte) propertyValue).byteValue() == 0) { // byte
+						continue ;
+					} else if (fieldCLass == short.class && propertyValue instanceof Short && ((Short) propertyValue).shortValue() == 0) { // short
+						continue ;
+					} else if (fieldCLass == int.class && propertyValue instanceof Integer && ((Integer) propertyValue).intValue() == 0) { // int
+						continue ;
+					} else if (fieldCLass == long.class && propertyValue instanceof Long && ((Long) propertyValue).longValue() == 0L) { // long
+						continue ;
+					} else if (fieldCLass == float.class && propertyValue instanceof Float && ((Float) propertyValue).floatValue() == 0F) { // float
+						continue ;
+					} else if (fieldCLass == double.class && propertyValue instanceof Double && ((Double) propertyValue).doubleValue() == 0D) { // double
+						continue ;
+					} else if (fieldCLass == boolean.class && propertyValue instanceof Boolean && !((Boolean) propertyValue).booleanValue()) { // double
+						continue ;
+					}
+				}
+				
+				if (commaFlag) { // 第一次为false, 第二次就为true, 在第一个字段转换JSON字符串后, commaFlag 设置为true, 
+					out.write(',');
+					if (out.isEnable(SerializerFeature.PrettyFormat)) {
+						serializer.println();
+					}
+				}
+				
+				if (key != fieldInfoName) {
+					if (!writeAsArray) {
+						out.writeFieldName(key, true);
+					}
+					
+					serializer.write(propertyValue);
+				} else if (originaValue != propertyValue) {
+					if (!writeAsArray) {
+						fieldSerializer.writePrefix(serializer);
+					}
+					serializer.write(propertyValue);
+				} else {
+					if (!writeAsArray) {
+						if (!fieldInfo.unwrapped) {
+							if (directWritePrefix) {
+								out.write(fieldInfo.name_chars, 0, fieldInfo.name_chars.length); // 此处是写入Key值的
+							} else {
+								fieldSerializer.writePrefix(serializer); // 检测字段是否 使用引号
+							}
+						}
+					}
+					
+					if (!writeAsArray) {
+						JSONField fieldAnnotation = fieldInfo.getAnnotation(); // 获取字段上的注解
+						if (fieldClass == String.class && (fieldAnnotation == null || fieldAnnotation.serializeUsing() == Void.class)) {
+							if (propertyValue == null) {
+								if ((out.features &SerializerFeature.WriteNullStringAsEmpty.mask) != 0
+										|| (fieldSerializer.features & SerializerFeature.WriteNullStringAsEmpty.mask) != 0) {
+									out.writeString("");
+								} else {
+									out.writeNull();
+								}
+							} else { // 将值写入到缓存中
+								String propertyValueString = (String) propertyValue;
+								
+								if (out.useSingleQuotes) { // 使用单引号
+									out.writeStringWithSingleQuote(propertyValueString);
+								} else { // 使用双引号
+									out.writeStringWithDoubleQuote(propertyValueString, (char) 0);
+								}
+							}
+						} else { // 这里判断的是值 对象不是String
+							fieldSerializer.writeValue(serializer, propertyValue);
+						}
+					} else {
+						fieldSerializer.writeValue(serializer, propertyValue);
+					}
+				}
+				
+				commaFlag = true;
 			}
-			
 			/** 遍历所有get方法, 字段拼接成 JSON字符串 end */
+			
 			
 		} catch (Exception e) {
 			// 此处没有完成
 		}
 	}
 
+	/**
+	 * 
+	 * <p>Title: writeAfter</p>
+	 * <p>Description: 解析JSON字符串 后过滤</p>
+	 * @param jsonBeanDeser
+	 * @param object
+	 * @param seperator
+	 * @return
+	 * @author java_liudong@163.com  2017年6月19日 下午6:42:24
+	 */
+	protected char writeAfter(JSONSerializer jsonBeanDeser, Object object, char seperator) {
+		if (jsonBeanDeser.afterFilters != null) {
+			for (AfterFilter afterFilter : jsonBeanDeser.afterFilters) {
+				seperator = afterFilter.writeAfter(jsonBeanDeser, object, seperator);
+			}
+		}
+		
+		if (this.afterFilters != null) {
+			for (AfterFilter afterFilter : this.afterFilters) {
+				seperator = afterFilter.writeAfter(jsonBeanDeser, object, seperator);
+			}
+		}
+		
+		return seperator;
+	}
+	
 	/**
 	 * 
 	 * <p>Title: applyLabel</p>
