@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.dongdongxia.myfastjson.JSONException;
 import com.dongdongxia.myfastjson.annotation.JSONField;
 import com.dongdongxia.myfastjson.util.FieldInfo;
 import com.dongdongxia.myfastjson.util.TypeUtils;
@@ -344,9 +345,31 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 			}
 			/** 遍历所有get方法, 字段拼接成 JSON字符串 end */
 			
+			this.writeAfter(serializer, object, commaFlag ? ',' : '\0');
 			
+			if (getters.length > 0 && out.isEnable(SerializerFeature.PrettyFormat)) { // 格式化
+				serializer.decrementIndent();
+				serializer.println();
+			}
+			
+			if (!unwrapped) {
+				out.append(endSeperator);
+			}
 		} catch (Exception e) {
-			// 此处没有完成
+			String errorMessage = "write javaBean error";
+			if (object != null) {
+				errorMessage += ", class " + object.getClass().getName();
+			}
+			if (fieldName != null) {
+				errorMessage += ", fieldName : " + fieldName;
+			}
+			if (e.getMessage() != null) {
+				errorMessage += (", " + e.getMessage());
+			}
+			
+			throw new JSONException(errorMessage, e);
+		} finally {
+			serializer.context = parent;
 		}
 	}
 
