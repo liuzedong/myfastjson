@@ -101,7 +101,7 @@ public enum SerializerFeature {
 	/**
 	 * 
 	 */
-	NotWriteDefaultValue, // 不写入基础数据类型(char, byte, integer, long ...)字段的默认值, 默认为false
+	NotWriteDefaultValue, // 如果基础数据类型(char, byte, integer, long ...)字段的为默认值0, null之类的, 就不进行JSON字符转换, 默认为false
 	/**
 	 * 
 	 */
