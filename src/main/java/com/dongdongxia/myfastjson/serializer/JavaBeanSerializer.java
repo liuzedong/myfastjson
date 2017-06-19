@@ -191,13 +191,45 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 				Class<?> objClass = object.getClass();
 				if (objClass != fieldType) {
 					writeClassName(serializer, object);
+					commaFlag = true;
 				}
 			}
+			
+			char seperator = commaFlag ? ',' : '\0';
+			
+			final boolean directWritePrefix = out.quoteFieldNames && !out.useSingleQuotes; // 是否使用双引号 
+			
 		} catch (Exception e) {
 			// 此处没有完成
 		}
 	}
 
+	/**
+	 * 
+	 * <p>Title: writeBefore</p>
+	 * <p>Description: 对分词器, 做过滤</p>
+	 * @param jsonBeanDeser
+	 * @param object
+	 * @param seperator
+	 * @return
+	 * @author java_liudong@163.com  2017年6月19日 下午4:42:04
+	 */
+	protected char writeBefore(JSONSerializer jsonBeanDeser, Object object, char seperator) {
+		if (jsonBeanDeser.beforeFilters != null) {
+			for (BeforeFilter beforeFilter : jsonBeanDeser.beforeFilters) {
+				seperator = beforeFilter.writeBefore(jsonBeanDeser, object, seperator);
+			}
+		}
+		
+		if (this.beforeFilters != null) {
+			for (BeforeFilter beforeFilter : this.beforeFilters) {
+				seperator = beforeFilter.writeBefore(jsonBeanDeser, object, seperator);
+			} 
+		}
+		
+		return seperator;
+	}
+	
 	/**
 	 * 
 	 * <p>Title: writeClassName</p>
