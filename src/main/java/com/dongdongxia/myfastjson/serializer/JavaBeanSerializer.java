@@ -1,10 +1,12 @@
 package com.dongdongxia.myfastjson.serializer;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.dongdongxia.myfastjson.util.FieldInfo;
 import com.dongdongxia.myfastjson.util.TypeUtils;
 /**
  * 
@@ -198,12 +200,76 @@ public class JavaBeanSerializer extends SerializerFilterable implements ObjectSe
 			char seperator = commaFlag ? ',' : '\0';
 			
 			final boolean directWritePrefix = out.quoteFieldNames && !out.useSingleQuotes; // 是否使用双引号 
+			char newSeperator = this.writeBefore(serializer, object, seperator);
+			commaFlag = newSeperator == ',';
+			
+			final boolean skipTransient = out.isEnable(SerializerFeature.SkipTransientField);
+			final boolean ignoreNonFieldGetter = out.isEnable(SerializerFeature.IgnoreNonFieldGetter);
+			
+			/** 遍历所有get方法, 字段拼接成 JSON字符串 begin */
+			for (int i = 0; i < getters.length; ++i) {
+				FieldSerializer fieldSerializer = getters[i];
+				
+				Field field = fieldSerializer.fieldInfo.field; // 当前字段
+				FieldInfo fieldInfo = fieldSerializer.fieldInfo; // 当前字段的详细信息
+				String fieldInfoName = fieldInfo.name; // 字段名
+				Class<?> fieldClass = fieldInfo.fieldClass; // 字段的对象名称
+				
+				if (skipTransient) { // 可序列化, 并且字段不为空, 那么就看对象上面是否有 不可序列化的注解, 有的话, 那么就不进行转换成为JSON
+					if (field != null) {
+						if (fieldInfo.fieldTransient) {
+							continue ;
+						}
+					}
+				}
+				
+				if (ignoreNonFieldGetter) { // 默认为false, 如果没有字段对象, 就忽略
+					if (field == null) {
+						continue ;
+					}
+				}
+				
+				if (this.applyName(serializer, object, fieldInfo.name)) {
+					
+				}
+			}
+			
+			/** 遍历所有get方法, 字段拼接成 JSON字符串 end */
 			
 		} catch (Exception e) {
 			// 此处没有完成
 		}
 	}
 
+	/**
+	 * 
+	 * <p>Title: applyLabel</p>
+	 * <p>Description: 使用Label过滤器</p>
+	 * @param jsonBeanDeser
+	 * @param label
+	 * @return
+	 * @author java_liudong@163.com  2017年6月19日 下午5:21:00
+	 */
+	protected boolean applyLabel(JSONSerializer jsonBeanDeser, String label) {
+		if (jsonBeanDeser.labelFilters != null) {
+			for (LabelFilter propertyFilter : jsonBeanDeser.labelFilters) {
+				if (!propertyFilter.apply(label)) {
+					return false;
+				}
+			}
+		}
+		
+		if (this.labelFilters != null) {
+			for (LabelFilter propertyFilter : this.labelFilters) {
+				if (!propertyFilter.apply(label)) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+	
 	/**
 	 * 
 	 * <p>Title: writeBefore</p>
