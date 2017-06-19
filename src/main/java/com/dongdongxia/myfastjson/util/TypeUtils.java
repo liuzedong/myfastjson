@@ -854,4 +854,32 @@ public class TypeUtils {
 		return new SerializeBeanInfo(beanType, jsonType, typeName, features, fields, sortedFields);
 	}
 	
+	/**
+	 * 
+	 * <p>Title: isProxy</p>
+	 * <p>Description: 该对象是否为代理对象, 实现下面接口的对象 就是代理对象</p>
+	 * </p>org.springframework.cglib.proxy.Factory, 
+	 * org.springframework.cglib.proxy.Factory, 
+	 * javassist.util.proxy.ProxyObject,
+	 * org.apache.ibatis.javassis.util.proxy.ProxyObject<p>
+	 * @param clazz
+	 * @return
+	 * @author java_liudong@163.com  2017年6月19日 下午4:16:34
+	 */
+	public static boolean isProxy(Class<?> clazz) {
+		for (Class<?> item : clazz.getInterfaces()) {
+			String interfaceName = item.getName();
+			if (interfaceName.equals("net.sf.cglib.proxy.Factory") // 实现此接口的对象为代理对象
+					|| interfaceName.equals("org.springframework.cglib.proxy.Factory")) { 
+				return true;
+			}
+			
+			if (interfaceName.equals("javassist.util.proxy.ProxyObject")
+					|| interfaceName.equals("org.apache.ibatis.javassis.util.proxy.ProxyObject")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }
