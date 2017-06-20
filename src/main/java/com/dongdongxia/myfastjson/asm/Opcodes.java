@@ -83,7 +83,7 @@ public interface Opcodes {
 	int GOTO = 167;
 	int RET = 169;
 	int ARETURN = 176;
-	int AETURN = 177;
+	int RETURN = 177;
 	int GETSTATIC = 178;
 	int GETFIELD = 180;
 	int PUTFIELD = 181;
