@@ -3,6 +3,7 @@ package com.dongdongxia.myfastjson.serializer;
 import static com.dongdongxia.myfastjson.util.ASMUtils.desc;
 import static com.dongdongxia.myfastjson.util.ASMUtils.type;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class ASMSerializerFactory implements Opcodes{
 	/**
 	 * 用来将生成对象加载到内存中
 	 */
-	protected final ASMClassLoader classLoader = new ASMClassLoader();
+	protected static final ASMClassLoader classLoader = new ASMClassLoader();
 	/**
 	 * 用来生成 每个 序列化对象名称中的序号, 以便不出现重名
 	 */
@@ -312,10 +313,74 @@ public class ASMSerializerFactory implements Opcodes{
 		    	mw.visitEnd();
 		    }
 		    
+		    if (!nativeSorted) {
+		    	// sortField support
+		    	Context context = new Context(getters, beanInfo, classNameType, false, DisableCircularReferenceDetect);
+		    	mw = new MethodWriter(cw, ACC_PUBLIC, "writeUnsorted", "(L" + JSONSerializer + ";Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;I)V", 
+		    			null, new String[] {"java/io/IOException"});
+		    	
+		    	mw.visitVarInsn(ALOAD, Context.serializer);
+		    	mw.visitFieldInsn(GETFIELD, JSONSerializer, "out", SerializeWriter_desc);
+		    	mw.visitVarInsn(ASTORE, context.var("out"));
+		    	
+		    	mw.visitVarInsn(ALOAD, Context.obj); // obj
+		    	mw.visitTypeInsn(CHECKCAST, type(clazz)); //  serializer
+		    	mw.visitVarInsn(ASTORE, context.var("entity")); // obj
+		    	
+		    	generateWriteMethod(clazz, mw, unsortedGetters, context);
+		    	
+		    	mw.visitInsn(RETURN);
+		    	mw.visitMaxs(7, context.variantIndex + 2);
+		    	mw.visitEnd();
+		    }
+		    
+		    
+		    /**
+		     * 0 writeAsArray
+		     * 1 writeAsArrayNormal
+		     * 2 writeAsArrayNonContext
+		     */
+		    for (int i = 0; i < 3; ++i) {
+		    	String methodName;
+		    	boolean nonContext = DisableCircularReferenceDetect;
+		    	boolean writeDirect = false;
+		    	if (i == 0) {
+		    		methodName = "writeAsArray";
+		    		writeDirect = true;
+		    	} else if (i == 1) {
+		    		methodName = "writeAsArrayNormal";
+		    	} else {
+		    		writeDirect = true;
+		    		nonContext = true;
+		    		methodName = "writeAsArrayNonContext";
+		    	}
+		    	
+		    	Context context = new Context(getters, beanInfo, classNameType, writeDirect, nonContext);
+		    	
+		    	mw = new MethodWriter(cw, ACC_PUBLIC, methodName, "(L" + JSONSerializer + ";Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;I)V",
+		    			null, new String[]{"java/io/IOException"});
+		    	
+		    	mw.visitVarInsn(ALOAD, Context.serializer);
+		    	mw.visitFieldInsn(GETFIELD, JSONSerializer, "out", SerializeWriter_desc);
+		    	mw.visitVarInsn(ASTORE, context.var("out"));
+		    	
+		    	mw.visitVarInsn(ALOAD, Context.obj); // obj
+		    	mw.visitTypeInsn(CHECKCAST, type(clazz)); // serializer
+		    	mw.visitVarInsn(ASTORE, context.var("entity"));
+		    	generateWriteMethod(clazz, mw, getters, context);
+		    	mw.visitInsn(RETURN);
+		    	mw.visitMaxs(7, context.variantIndex + 2);
+		    	mw.visitEnd();
+		    }
 			/** 下面是使用ASM 进行生成Java字节码, 动态生成解析 JSON解析对象 end */
-			
-			
-			return null;
+
+		    
+		    byte[] code = cw.toByteArray();
+		    
+			Class<?> exampleClass = classLoader.defineClassPublic(classNameFull, code, 0, code.length);
+			Constructor<?> constructor = exampleClass.getConstructor(SerializeBeanInfo.class);
+			Object instance = constructor.newInstance(beanInfo);
+			return (JavaBeanSerializer) instance;
 		}
 		
 		/**
