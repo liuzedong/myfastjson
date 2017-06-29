@@ -1,9 +1,15 @@
 package com.dongdongxia.myfastjson.parser;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.security.AccessControlException;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 import com.dongdongxia.myfastjson.parser.deserializer.ASMDeserializerFactory;
+import com.dongdongxia.myfastjson.parser.deserializer.ObjectDeserializer;
+import com.dongdongxia.myfastjson.util.ASMClassLoader;
+import com.dongdongxia.myfastjson.util.ASMUtils;
 import com.dongdongxia.myfastjson.util.IOUtils;
 
 /**
@@ -22,6 +28,15 @@ public class ParserConfig {
 	private static final String[] AUTO_TYPE_ACCEPT_LIST;
 	public static final boolean AUTO_SUPPORT;
 	
+	public final boolean fieldBase;
+	protected ASMDeserializerFactory asmFactory;
+	
+	private boolean asmEnable = !ASMUtils.IS_ANDROID;
+	
+	/**
+	 * 将常见解析对象,进行缓存
+	 */
+	private final IdentityHashMap<Type, ObjectDeserializer> deserializers = new IdentityHashMap<Type, ObjectDeserializer>();
 	
 	static {
 		{
@@ -80,6 +95,29 @@ public class ParserConfig {
 	 * @param fieldBase
 	 */
 	private ParserConfig(ASMDeserializerFactory asmFactory, ClassLoader parentClassLoader, boolean fieldBase) {
+		this.fieldBase = fieldBase;
+		if (asmFactory == null && !ASMUtils.IS_ANDROID) {
+			try {
+				if (parentClassLoader == null) { // 使用类加载器, 初始化ASMDeserializerFactory
+					asmFactory = new ASMDeserializerFactory(new ASMClassLoader());
+				} else {
+					asmFactory = new ASMDeserializerFactory(parentClassLoader);
+				}
+			} catch (ExceptionInInitializerError error) { // 初始化值或 静态变量初始化的期间发生的异常
+				// skip
+			} catch (AccessControlException error) { // 权限不够抛出来的异常, 比如访问权限, 网络权限, 数据类型权限等
+				// skip
+			} catch (NoClassDefFoundError error) { // 无法找到该类的定义时, 抛出此异常
+				// skip
+			}
+		}
+		
+		this.asmFactory = asmFactory;
+		
+		if (asmFactory == null) { // 这里创建对象为null , 就不进行字节码, 进行解析, 一般, 不为null, 所以不是android , 就为true
+			asmEnable = false; 
+		}
+		
 		
 	}
 	
