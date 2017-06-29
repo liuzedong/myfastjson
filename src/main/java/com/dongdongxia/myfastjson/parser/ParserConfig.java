@@ -3,6 +3,7 @@ package com.dongdongxia.myfastjson.parser;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+import com.dongdongxia.myfastjson.parser.deserializer.ASMDeserializerFactory;
 import com.dongdongxia.myfastjson.util.IOUtils;
 
 /**
@@ -53,6 +54,34 @@ public class ParserConfig {
 	}
 	
 	public static ParserConfig global = new ParserConfig();
+	
+	public ParserConfig() {
+		this(false);
+	}
+	
+	public ParserConfig(boolean fieldBase) {
+		this(null, null, fieldBase);
+	}
+	
+	public ParserConfig(ClassLoader parentClassLoader) {
+		this(null, parentClassLoader, false);
+	}
+	
+	public ParserConfig(ASMDeserializerFactory asmFactory) {
+		this(asmFactory, null, false);
+	}
+	
+	/**
+	 * 
+	 * <p>Title: Constructor</p>
+	 * <p>Description: 总的构造方法,用来初始化, 基础的反射JSON转对象的缓存</p>
+	 * @param asmFactory
+	 * @param parentClassLoader
+	 * @param fieldBase
+	 */
+	private ParserConfig(ASMDeserializerFactory asmFactory, ClassLoader parentClassLoader, boolean fieldBase) {
+		
+	}
 	
 	/**
 	 * 
