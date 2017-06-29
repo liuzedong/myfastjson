@@ -59,7 +59,7 @@ public enum Feature {
 	/**
 	 * 
 	 */
-	InitStringFieldAsEmpty,
+	InitStringFieldAsEmpty, // 初始化解析串为"", 默认为false
 	/**
 	 * 
 	 */
