@@ -15,7 +15,7 @@ public class ASMUtils {
 	public static final String JAVA_VM_HOME = System.getProperty("java.vm.name");
 	
 	// 检测是否是Android 的虚拟机
-	public static final boolean is_android = isAndroid(JAVA_VM_HOME);
+	public static final boolean IS_ANDROID = isAndroid(JAVA_VM_HOME);
 	
 	/**
 	 * 
