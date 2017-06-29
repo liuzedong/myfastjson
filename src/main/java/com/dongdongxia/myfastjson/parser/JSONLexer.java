@@ -7,4 +7,6 @@ package com.dongdongxia.myfastjson.parser;
  */
 public interface JSONLexer {
 
+	char EOI = 0x1A;
+	
 }
