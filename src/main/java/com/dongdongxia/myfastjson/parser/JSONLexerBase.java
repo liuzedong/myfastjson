@@ -42,6 +42,7 @@ public abstract class JSONLexerBase implements JSONLexer, Closeable{
 		}
 	}
 	
+	public abstract char next();
 	
 	@Override
 	public void close() throws IOException {
