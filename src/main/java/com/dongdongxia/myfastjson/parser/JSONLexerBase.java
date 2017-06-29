@@ -10,6 +10,7 @@ import java.io.IOException;
  */
 public abstract class JSONLexerBase implements JSONLexer, Closeable{
 
+	protected char ch;
 	protected int bp;
 	
 	
