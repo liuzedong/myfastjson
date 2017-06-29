@@ -25,7 +25,7 @@ public final class JSONScanner extends JSONLexerBase{
 		bp = -1;
 		
 		next();
-		if (ch == 65279) { // utf-8 bom , 包含此字符的, 是UTF-8 bom的
+		if (ch == 65279) { // utf-8 bom , 包含此字符的, 是UTF-8 bom的, 第一个字符, 是空的 65279, 所以循环寻找下一个
 			next();
 		}
 	}
