@@ -42,6 +42,18 @@ public abstract class JSONLexerBase implements JSONLexer, Closeable{
 		}
 	}
 	
+	/**
+	 * 
+	 * <p>Title: getCurrent</p>
+	 * <p>Description: 返回当前的第一个字符</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年6月29日 下午5:17:14
+	 * @see com.dongdongxia.myfastjson.parser.JSONLexer#getCurrent()
+	 */
+	public final char getCurrent() {
+		return ch;
+	}
+	
 	public abstract char next();
 	
 	@Override
