@@ -10,6 +10,35 @@ import java.io.IOException;
  */
 public abstract class JSONLexerBase implements JSONLexer, Closeable{
 
+	protected int features;
+	
+	/**
+	 * 本地缓存的数据
+	 */
+	protected char[] sbuf;
+	
+	/**
+	 * 缓存本地数据
+	 */
+	private final static ThreadLocal<char[]> SBUF_LOCAL = new ThreadLocal<char[]>();
+	
+	protected String stringDefaultValue = null;
+	
+	public JSONLexerBase(int features) {
+		this.features = features;
+		
+		if ((features & Feature.InitStringFieldAsEmpty.mask) != 0) {
+			stringDefaultValue = "";
+		}
+		
+		sbuf = SBUF_LOCAL.get();
+		
+		if (sbuf == null) {
+			sbuf = new char[512];
+		}
+	}
+	
+	
 	@Override
 	public void close() throws IOException {
 		
