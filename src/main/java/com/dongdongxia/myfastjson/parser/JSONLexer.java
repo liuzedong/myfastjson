@@ -9,6 +9,8 @@ public interface JSONLexer {
 
 	char EOI = 0x1A;
 	
+	void nextToken();
+	
 	char getCurrent();
 	
 	char next();
