@@ -34,4 +34,25 @@ public final class JSONScanner extends JSONLexerBase{
 		int indext = ++bp;
 		return ch = (indext >= this.len ? EOI : text.charAt(indext));
 	}
+
+	/**
+	 * 
+	 * <p>Title: isEOF</p>
+	 * <p>Description: 判断文本是否已经到达结尾啦</p>
+	 * @return
+	 * @author java_liudong@163.com  2017年7月3日 上午10:34:59
+	 * @see com.dongdongxia.myfastjson.parser.JSONLexerBase#isEOF()
+	 */
+	@Override
+	public boolean isEOF() {
+		return bp == len || ch == EOI && bp + 1 == len;
+	}
+
+	/*
+	 * 将文本开始位置到个数, 复制到 字符数组中
+	 */
+	@Override
+	protected void copyTo(int offset, int count, char[] dest) {
+		text.getChars(offset, offset + count, dest, 0);
+	}
 }

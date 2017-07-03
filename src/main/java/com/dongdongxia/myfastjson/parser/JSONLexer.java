@@ -15,4 +15,11 @@ public interface JSONLexer {
 	
 	char next();
 	
+	void scanString();
+	
+	void scanNumber();
+	
+	boolean isEnabled(int feature);
+	
+	boolean isEnabled(Feature feature);
 }

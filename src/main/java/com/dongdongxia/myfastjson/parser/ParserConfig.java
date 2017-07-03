@@ -31,12 +31,20 @@ public class ParserConfig {
 	public final boolean fieldBase;
 	protected ASMDeserializerFactory asmFactory;
 	
+	/**
+	 * 是否使用 字节码 生成对象
+	 */
 	private boolean asmEnable = !ASMUtils.IS_ANDROID;
 	
 	/**
 	 * 将常见解析对象,进行缓存
 	 */
 	private final IdentityHashMap<Type, ObjectDeserializer> deserializers = new IdentityHashMap<Type, ObjectDeserializer>();
+	
+	/**
+	 * 
+	 */
+	public final SymbolTable symbolTable = new SymbolTable(4096);
 	
 	static {
 		{

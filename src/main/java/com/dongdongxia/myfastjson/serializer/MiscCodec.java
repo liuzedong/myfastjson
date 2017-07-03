@@ -14,6 +14,8 @@ import java.util.TimeZone;
 import com.dongdongxia.myfastjson.JSON;
 import com.dongdongxia.myfastjson.JSONException;
 import com.dongdongxia.myfastjson.JSONStreamAware;
+import com.dongdongxia.myfastjson.parser.DefaultJSONParser;
+import com.dongdongxia.myfastjson.parser.deserializer.ObjectDeserializer;
 
 /**
  * 
@@ -21,7 +23,7 @@ import com.dongdongxia.myfastjson.JSONStreamAware;
  * @ClassName: MiscCodec
  * @author java_liudong@163.com  2017年6月8日 上午10:24:09
  */
-public class MiscCodec implements ObjectSerializer{
+public class MiscCodec implements ObjectSerializer, ObjectDeserializer{
 	
 	public final static MiscCodec instance = new MiscCodec();
 
@@ -162,6 +164,19 @@ public class MiscCodec implements ObjectSerializer{
 		}
 		out.write(']');
 		return ;
+	}
+
+	@Override
+	public <T> T deserialze(DefaultJSONParser parser, Type type,
+			Object fieldName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getFastMatchToken() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 	
