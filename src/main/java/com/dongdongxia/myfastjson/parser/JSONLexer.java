@@ -22,4 +22,6 @@ public interface JSONLexer {
 	boolean isEnabled(int feature);
 	
 	boolean isEnabled(Feature feature);
+	
+	String stringVal();
 }

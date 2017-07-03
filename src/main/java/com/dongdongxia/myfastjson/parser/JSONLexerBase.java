@@ -32,6 +32,8 @@ public abstract class JSONLexerBase implements JSONLexer, Closeable{
 	protected char ch; // 存储当前的字符
 	protected int bp; // 当前读取字符的下标
 	
+	protected int eofPos;
+	
 	protected final static int[] digits = new int[(int) 'f' + 1];
 	
 	static {
@@ -126,7 +128,262 @@ public abstract class JSONLexerBase implements JSONLexer, Closeable{
 					}
 					scanStringSingleQuote();
 					return ;
+				case ' ' :
+				case '\t' :
+				case '\b' :
+				case '\f' :
+				case '\n' :
+				case '\r' :
+					next();
+					break;
+				case 't' : // true
+					scanTrue();
+					return ;
+				case 'f' : // false
+					scanFalse();
+					return ;
+				case 'n' :
+					scanNullOrNew();
+					return ;
+				case 'T' :
+				case 'N' :
+				case 'S' :
+				case 'u' :
+					scanIdent();
+					return;
+				case '(' :
+					next();
+					token = JSONToken.LPAREN;
+					return ;
+				case ')' :
+					next();
+					token = JSONToken.RPAREN;
+					return ;
+				case '[' :
+					next();
+					token = JSONToken.LBRACKET;
+					return ;
+				case ']' :
+					next();
+					token = JSONToken.RBRACKET;
+					return ;
+				case '{' :
+					next();
+					token = JSONToken.LBRACE;
+					return ;
+				case '}' :
+					next();
+					token = JSONToken.RBRACE;
+					return ;
+				case ':' :
+					next();
+					token = JSONToken.COLON;
+					return;
+				case ';' :
+					next();
+					token = JSONToken.SEMI;
+					return ;
+				case '.' :
+					next();
+					token = JSONToken.DOT;
+					return ;
+				case '+' :
+					next();
+					scanNumber();
+					return ;
+				default :
+					if (isEOF()) { // JLS
+						if (token == JSONToken.EOF) {
+							throw new JSONException("EOF error");
+						}
+						
+						token = JSONToken.EOF;
+						pos = bp = eofPos;
+					} else {
+						if (ch <= 31 || ch == 127) {
+							next();
+							break;
+						}
+						
+						lexError("iillefal.char", String.valueOf((int) ch));
+						next();
+					}
 			}
+		}
+	}
+	
+	protected void lexError(String key, Object...args) {
+		token = JSONToken.ERROR;
+	}
+	
+	/**
+	 * 
+	 * <p>Title: scanIdent</p>
+	 * <p>Description: 扫描部分关键字</p>
+	 * @author java_liudong@163.com  2017年7月3日 下午3:24:38
+	 */
+	public final void scanIdent() {
+		np = bp - 1;
+		hasSpecial = false;
+		
+		for (;;) {
+			sp++;
+			
+			next();
+			if(Character.isLetterOrDigit(ch)) {
+				continue ;
+			}
+			
+			String ident = stringVal();
+			
+			if ("null".equalsIgnoreCase(ident)) {
+				token = JSONToken.NULL;
+			} else if ("new".equals(ident)) {
+				token = JSONToken.NEW;
+			} else if ("true".equals(ident)) {
+				token = JSONToken.TRUE;
+			} else if ("false".equals(ident)) {
+				token = JSONToken.FALSE;
+			} else if ("undefined".equals(ident)) {
+				token = JSONToken.UNDEFINED;
+			} else if ("Set".equals(ident)) {
+				token = JSONToken.SET;
+			} else if ("TreeSet".equals(ident)) {
+				token = JSONToken.TREE_SET;
+			} else {
+				token = JSONToken.IDENTIFIER;
+			}
+			return ;
+		}
+	}
+	
+	public abstract String stringVal();
+	
+	public abstract String subString(int offset, int count);
+	
+	/**
+	 * 
+	 * <p>Title: scanNullOrNew</p>
+	 * <p>Description: 扫描下一个字符 null or new</p>
+	 * @author java_liudong@163.com  2017年7月3日 下午2:39:49
+	 */
+	public final void scanNullOrNew() {
+		if (ch != 'n') {
+			throw new JSONException("error parse null or new");
+		}
+		next();
+		
+		if (ch == 'u') {
+			next();
+			if (ch != 'l') {
+				throw new JSONException("error parse null");
+			}
+			next();
+			
+			if (ch != 'l') {
+				throw new JSONException("error parse null");
+			}
+			next();
+			
+			if (ch == ' ' || ch == ',' || ch == '}' || ch == ']' || ch == '\n' || ch == '\r' || ch == '\t' || ch == EOI
+	                || ch == '\f' || ch == '\b') {
+				token = JSONToken.NULL;
+			} else {
+				throw new JSONException("scan null error");
+			} 
+			return ;
+		}
+		
+		if (ch != 'e') {
+			throw new JSONException("error parse new");
+		}
+		next();
+		
+		if (ch != 'w') {
+			throw new JSONException("error parse new");
+		}
+		next();
+		
+		if (ch == ' ' || ch == ',' || ch == '}' || ch == ']' || ch == '\n' || ch == '\r' || ch == '\t' || ch == EOI
+	            || ch == '\f' || ch == '\b') {
+			token = JSONToken.NEW;
+		} else {
+			throw new JSONException("scan new error");
+		}
+	}
+	
+	/**
+	 * 
+	 * <p>Title: scanTrue</p>
+	 * <p>Description: 根据转译字符扫描true</p>
+	 * @author java_liudong@163.com  2017年7月3日 下午2:30:35
+	 */
+	public final void scanTrue() {
+		if (ch != 't') {
+			throw new JSONException("error parse true");
+		}
+		next();
+		
+		if (ch != 'r') {
+			throw new JSONException("error parse true");
+		}
+		next();
+		
+		if (ch != 'u') {
+			throw new JSONException("error parse true");
+		}
+		next();
+		
+		if (ch != 'e') {
+			throw new JSONException("error parse true");
+		}
+		next();
+		
+		if (ch == ' ' || ch == ',' || ch == '}' || ch == ']' || ch == '\n' || ch == '\r' || ch == '\t' || ch == EOI
+	            || ch == '\f' || ch == '\b' || ch == ':' || ch == '/') {
+			token = JSONToken.TRUE;
+		} else {
+			throw new JSONException("scan true error");
+		}
+	}
+	
+	/**
+	 * 
+	 * <p>Title: scanFalse</p>
+	 * <p>Description: 扫描转译字符后面false</p>
+	 * @author java_liudong@163.com  2017年7月3日 下午2:35:02
+	 */
+	public final void scanFalse() {
+		if (ch != 'f') {
+			throw new JSONException("error parse false");
+		}
+		next();
+		
+		if (ch != 'a') {
+			throw new JSONException("error parse false");
+		}
+		next();
+		
+		if (ch != 'l') {
+			throw new JSONException("error parse false");
+		}
+		next();
+		
+		if (ch != 's') {
+			throw new JSONException("error parse false");
+		}
+		next();
+		
+		if (ch != 'e') {
+			throw new JSONException("error parse false");
+		}
+		next();
+		
+		if (ch == ' ' || ch == ',' || ch == '}' || ch == ']' || ch == '\n' || ch == '\r' || ch == '\t' || ch == EOI
+	            || ch == '\f' || ch == '\b' || ch == ':' || ch == '/') {
+			token = JSONToken.FALSE;
+		} else {
+			throw new JSONException("scan false error");
 		}
 	}
 	

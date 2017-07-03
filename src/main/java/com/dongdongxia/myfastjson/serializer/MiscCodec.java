@@ -15,6 +15,7 @@ import com.dongdongxia.myfastjson.JSON;
 import com.dongdongxia.myfastjson.JSONException;
 import com.dongdongxia.myfastjson.JSONStreamAware;
 import com.dongdongxia.myfastjson.parser.DefaultJSONParser;
+import com.dongdongxia.myfastjson.parser.JSONLexer;
 import com.dongdongxia.myfastjson.parser.deserializer.ObjectDeserializer;
 
 /**
@@ -166,10 +167,10 @@ public class MiscCodec implements ObjectSerializer, ObjectDeserializer{
 		return ;
 	}
 
+	
 	@Override
-	public <T> T deserialze(DefaultJSONParser parser, Type type,
-			Object fieldName) {
-		// TODO Auto-generated method stub
+	public <T> T deserialze(DefaultJSONParser parser, Type type, Object fieldName) {
+		JSONLexer lexer = parser.lexer; // 获取词法分词, 一般是{
 		return null;
 	}
 

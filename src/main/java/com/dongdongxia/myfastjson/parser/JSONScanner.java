@@ -1,4 +1,7 @@
 package com.dongdongxia.myfastjson.parser;
+
+import com.dongdongxia.myfastjson.util.ASMUtils;
+
 /**
  * 说是这个类做勒, 为勒性能做勒特别处理, 所以性能很重要, 着重看
  * <P>Description: JSON扫描器, 用来解析使用</P>
@@ -54,5 +57,39 @@ public final class JSONScanner extends JSONLexerBase{
 	@Override
 	protected void copyTo(int offset, int count, char[] dest) {
 		text.getChars(offset, offset + count, dest, 0);
+	}
+
+	@Override
+	public String stringVal() {
+		if (!hasSpecial) {
+			return this.subString(np + 1, sp);
+		} else {
+			return new String(sbuf, 0, sp);
+		}
+	}
+	
+	/**
+	 * 
+	 * <p>Title: subString</p>
+	 * <p>Description: 截取JSON字符串文本</p>
+	 * @param offset
+	 * @param count
+	 * @return
+	 * @author java_liudong@163.com  2017年7月3日 下午3:20:00
+	 * @see com.dongdongxia.myfastjson.parser.JSONLexerBase#subString(int, int)
+	 */
+	public final String subString(int offset, int count) {
+		if (ASMUtils.IS_ANDROID) {
+			if (count < sbuf.length) {
+				text.getChars(offset, offset + count, sbuf, 0);
+				return new String(sbuf, 0, count);
+			} else {
+				char[] chars = new char[count];
+				text.getChars(offset, offset + count, chars, 0);
+				return new String(chars);
+			}
+		} else {
+			return text.substring(offset, offset + count);
+		}
 	}
 }
