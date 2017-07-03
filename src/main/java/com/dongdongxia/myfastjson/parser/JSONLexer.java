@@ -7,7 +7,7 @@ package com.dongdongxia.myfastjson.parser;
  */
 public interface JSONLexer {
 
-	char EOI = 0x1A;
+	char EOI = 0x1A; // 文本结尾标识
 	
 	void nextToken();
 	
